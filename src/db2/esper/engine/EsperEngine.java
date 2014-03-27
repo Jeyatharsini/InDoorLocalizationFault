@@ -26,7 +26,7 @@ public class EsperEngine {
 		cepConfig.addEventType("DwcEvent", DwcEvent.class.getName());
 		cepConfig.addEventType("LocationEvent", LocationEvent.class.getName());
 
-//		String query = null;
+//		String query = "......";
 		
 		// The Configuration is meant only as an initialization-time object.
 
