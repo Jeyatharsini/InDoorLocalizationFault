@@ -10,18 +10,11 @@ public class DwcEvent extends SensorEvent {
 	public DwcEvent(Timestamp timestamp, int deviceID, boolean status, double x, double y) {
 		super(timestamp, deviceID, status, x, y);
 	}
-/*
- * 
- * (non-Javadoc)
- * @see db2.esper.event.models.LocationEvent#toString()
- */
+
 	@Override
 	public String toString() {
 		return "Dwc [CATEGORY_ID=" + CATEGORY_ID + ", RADIUS=" + RADIUS
 				+ ", deviceID=" + deviceID + ", status=" + status + ", x=" + x
 				+ ", y=" + y + ", timestamp=" + timestamp + "]";
-	}
-	
-	
-	
+	}	
 }

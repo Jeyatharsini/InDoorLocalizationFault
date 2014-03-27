@@ -12,38 +12,39 @@ import com.espertech.esper.client.EPRuntime;
 import db2.esper.event.models.LocationEvent;
 import db2.esper.event.models.PirwEvent;
 
-/* Rilevamenti:
- * A: senza fault
- * B: senza fault
- * C: senza fault
- * D: senza device di localizzazione
- * E: con un pir non attivo
- * 
- */
-
 public class EventGenerator extends Thread {
 	
-	protected int periodMS=1000;
-	protected boolean verbose = false;
+	protected boolean verbose = false; //TRUE se vuoi debuggarmi
 	
 	protected EPRuntime cepRT;
-	protected String filePath;
-	protected Scanner scanFile; 
+	protected String[] filesPath;
+	protected Scanner scannerLocationFile;
+	protected Scanner scannerStateDumpFile;
 	
-	public EventGenerator(EPRuntime cepRT, String[] args) {
+	/**
+	 * Constructor
+	 * @param cepRT, EPRuntim, the configured Cep run time
+	 * @param filesPath, String[], the path of the files with the log
+	 */
+	public EventGenerator(EPRuntime cepRT, String[] filesPath) {
 		super();
 		this.cepRT = cepRT;
-		this.filePath = args[0];		
+		this.filesPath = filesPath;		
 		
 		try {
-			setParser();
+			setParsers();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private void setParser() throws FileNotFoundException{
-		scanFile= new Scanner(new File(filePath));
+	/**
+	 * Initialize two scanners, one for each file to scan
+	 * @throws FileNotFoundException, if one files is not found
+	 */
+	private void setParsers() throws FileNotFoundException{
+		scannerStateDumpFile = new Scanner(new File(filesPath[0]));
+		scannerLocationFile = new Scanner(new File(filesPath[1]));
 	}
 	
 	@Override
