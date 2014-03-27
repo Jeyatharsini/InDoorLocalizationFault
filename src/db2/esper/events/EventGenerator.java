@@ -89,8 +89,6 @@ public class EventGenerator extends Thread {
 			String newTok=scan.next();
 			String oldTok=lastScan.next();
 			if(!newTok.contentEquals(oldTok)){
-				if (sensId>20){
-					GroundTruth ev = new GroundTruth(sensId,new Byte(newTok),second);
 					if (verbose)
 						System.out.println(ev.toString());
 					cepRT.sendEvent(ev);
