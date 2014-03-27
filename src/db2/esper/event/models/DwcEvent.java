@@ -3,12 +3,16 @@ package db2.esper.event.models;
 public class DwcEvent extends SensorEvent {
 
 	private final String CATEGORY_ID = "door"; //TODO toglimi sono antiestetico!
-	private final int RADIUS = 3;	// da capire se è da mettere o meno...
+	private final int RADIUS = 3;	// da capire se ÔøΩ da mettere o meno...
 	
 	public DwcEvent(long timestamp, int deviceID, boolean status, double x, double y) {
 		super(timestamp, deviceID, status, x, y);
 	}
-
+/*
+ * 
+ * (non-Javadoc)
+ * @see db2.esper.event.models.LocationEvent#toString()
+ */
 	@Override
 	public String toString() {
 		return "Dwc [CATEGORY_ID=" + CATEGORY_ID + ", RADIUS=" + RADIUS
