@@ -1,0 +1,31 @@
+TimeStamp=1395237142.27,DeviceID=1,DeviceName=PIRC 2.12,ZoneName=Room 2.12,CategoryName=PIRC,ZwayNumber=15,Status=false
+TimeStamp=1395237142.57,DeviceID=2,DeviceName=PIRW corridor,ZoneName=Corridor,CategoryName=PIRW,ZwayNumber=21,Status=false
+TimeStamp=1395237142.87,DeviceID=3,DeviceName=PIRW Salice,ZoneName=Salice,CategoryName=PIRW,ZwayNumber=16,Status=false
+TimeStamp=1395237143.28,DeviceID=4,DeviceName=PIRW wc,ZoneName=WC,CategoryName=PIRW,ZwayNumber=6,Status=false
+TimeStamp=1395237143.57,DeviceID=5,DeviceName=Door Salice,ZoneName=Salice,CategoryName=DOOR,ZwayNumber=19,Status=false
+TimeStamp=1395237143.87,DeviceID=6,DeviceName=DOOR wc,ZoneName=WC,CategoryName=DOOR,ZwayNumber=18,Status=false
+TimeStamp=1395237144.19,DeviceID=7,DeviceName=Door 2.12,ZoneName=2.12,CategoryName=DOOR,ZwayNumber=17,Status=false
+TimeStamp=1395237145.25,DeviceID=1,DeviceName=PIRC 2.12,ZoneName=Room 2.12,CategoryName=PIRC,ZwayNumber=15,Status=true
+TimeStamp=1395237172.38,DeviceID=7,DeviceName=Door 2.12,ZoneName=2.12,CategoryName=DOOR,ZwayNumber=17,Status=true
+TimeStamp=1395237174.38,DeviceID=7,DeviceName=Door 2.12,ZoneName=2.12,CategoryName=DOOR,ZwayNumber=17,Status=false
+TimeStamp=1395237175.41,DeviceID=2,DeviceName=PIRW corridor,ZoneName=Corridor,CategoryName=PIRW,ZwayNumber=21,Status=true
+TimeStamp=1395237185.4,DeviceID=1,DeviceName=PIRC 2.12,ZoneName=Room 2.12,CategoryName=PIRC,ZwayNumber=15,Status=false
+TimeStamp=1395237186.4,DeviceID=5,DeviceName=Door Salice,ZoneName=Salice,CategoryName=DOOR,ZwayNumber=19,Status=true
+TimeStamp=1395237188.04,DeviceID=5,DeviceName=Door Salice,ZoneName=Salice,CategoryName=DOOR,ZwayNumber=19,Status=false
+TimeStamp=1395237191.75,DeviceID=3,DeviceName=PIRW Salice,ZoneName=Salice,CategoryName=PIRW,ZwayNumber=16,Status=true
+TimeStamp=1395237202.47,DeviceID=2,DeviceName=PIRW corridor,ZoneName=Corridor,CategoryName=PIRW,ZwayNumber=21,Status=false
+TimeStamp=1395237204.58,DeviceID=3,DeviceName=PIRW Salice,ZoneName=Salice,CategoryName=PIRW,ZwayNumber=16,Status=false
+TimeStamp=1395237232.62,DeviceID=3,DeviceName=PIRW Salice,ZoneName=Salice,CategoryName=PIRW,ZwayNumber=16,Status=true
+TimeStamp=1395237234.98,DeviceID=5,DeviceName=Door Salice,ZoneName=Salice,CategoryName=DOOR,ZwayNumber=19,Status=true
+TimeStamp=1395237239.01,DeviceID=5,DeviceName=Door Salice,ZoneName=Salice,CategoryName=DOOR,ZwayNumber=19,Status=false
+TimeStamp=1395237240.42,DeviceID=2,DeviceName=PIRW corridor,ZoneName=Corridor,CategoryName=PIRW,ZwayNumber=21,Status=true
+TimeStamp=1395237246.6,DeviceID=3,DeviceName=PIRW Salice,ZoneName=Salice,CategoryName=PIRW,ZwayNumber=16,Status=false
+TimeStamp=1395237250.9,DeviceID=4,DeviceName=PIRW wc,ZoneName=WC,CategoryName=PIRW,ZwayNumber=6,Status=true
+TimeStamp=1395237251.52,DeviceID=6,DeviceName=DOOR wc,ZoneName=WC,CategoryName=DOOR,ZwayNumber=18,Status=true
+TimeStamp=1395237257.17,DeviceID=6,DeviceName=DOOR wc,ZoneName=WC,CategoryName=DOOR,ZwayNumber=18,Status=false
+TimeStamp=1395237259.41,DeviceID=7,DeviceName=Door 2.12,ZoneName=2.12,CategoryName=DOOR,ZwayNumber=17,Status=true
+TimeStamp=1395237263.39,DeviceID=7,DeviceName=Door 2.12,ZoneName=2.12,CategoryName=DOOR,ZwayNumber=17,Status=false
+TimeStamp=1395237266.22,DeviceID=1,DeviceName=PIRC 2.12,ZoneName=Room 2.12,CategoryName=PIRC,ZwayNumber=15,Status=true
+TimeStamp=1395237272.84,DeviceID=4,DeviceName=PIRW wc,ZoneName=WC,CategoryName=PIRW,ZwayNumber=6,Status=false
+TimeStamp=1395237278.49,DeviceID=2,DeviceName=PIRW corridor,ZoneName=Corridor,CategoryName=PIRW,ZwayNumber=21,Status=false
+TimeStamp=1395237286.31,DeviceID=1,DeviceName=PIRC 2.12,ZoneName=Room 2.12,CategoryName=PIRC,ZwayNumber=15,Status=false
