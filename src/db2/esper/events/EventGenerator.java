@@ -3,7 +3,6 @@ package db2.esper.events;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.Timestamp;
-import java.text.DecimalFormat;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,7 +11,6 @@ import com.espertech.esper.client.EPRuntime;
 
 import db2.esper.event.models.LocationEvent;
 import db2.esper.event.models.PirwEvent;
-import db2.esper.event.models.SensorEvent;
 
 /* Rilevamenti:
  * A: senza fault
@@ -26,7 +24,7 @@ import db2.esper.event.models.SensorEvent;
 public class EventGenerator extends Thread {
 	
 	protected int periodMS=1000;
-	protected boolean verbose=true;
+	protected boolean verbose = false;
 	
 	protected EPRuntime cepRT;
 	protected String filePath;
@@ -62,7 +60,7 @@ public class EventGenerator extends Thread {
 			String line = scanFile.nextLine();
 			
 			if(line.contains("PIRW")) {
-				System.out.println("PIRW");
+				if(verbose) System.out.println("PIRW");
 				Scanner scanner = new Scanner(line);
 				scanner.useDelimiter(",");
 				
@@ -73,7 +71,7 @@ public class EventGenerator extends Thread {
 				Matcher matcher = pattern.matcher(token);
 				if (matcher.find()) {
 					timestamp = new Timestamp((long) (Double.valueOf( matcher.group(0) ) * 1000));
-					System.out.println(timestamp);
+					if(verbose) System.out.println(timestamp);
 				}
 				
 				
@@ -84,7 +82,7 @@ public class EventGenerator extends Thread {
 				int deviceID = 0;
 				if (matcher.find()) {
 					deviceID = Integer.valueOf( matcher.group(0) );
-					System.out.println(deviceID);
+					if(verbose) System.out.println(deviceID);
 				}
 				
 				
@@ -98,21 +96,21 @@ public class EventGenerator extends Thread {
 				Boolean status = null;
 				if (token.contains("false")) {
 					status = false;
-					System.out.println(status);
+					if(verbose) System.out.println(status);
 				} else if (token.contains("true")) {
 					status = true;
-					System.out.println(status);
+					if(verbose) System.out.println(status);
 				}
 				
 				event = new PirwEvent(timestamp, deviceID, status, 10, 10);
-				System.out.println(event.toString());
+				if(verbose) System.out.println(event.toString());
 
 				scanner.close();
 
 			} else if(line.contains("PIRC")) {
-				System.out.println("PIRC");
+				if(verbose) System.out.println("PIRC");
 			} else if(line.contains("DOOR")) {
-				System.out.println("DOOR");
+				if(verbose) System.out.println("DOOR");
 			} else {
 				
 				Pattern pattern = Pattern.compile("[a-zA-Z\\_]+");
@@ -129,18 +127,24 @@ public class EventGenerator extends Thread {
 					
 					event = new LocationEvent(positionX, positionY, timestamp);
 					
-					System.out.println(event.toString());
+					if(verbose) System.out.println(event.toString());
 					
 				}
 				
 			}
 			
+			//TODO temporizzazione degli eventi
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			cepRT.sendEvent(event);
 
 		}
 		
-		//TODO temporizzazione degli eventi
-		
-		cepRT.sendEvent(event);
+		//TODO SPEGNI IL THREAD! PIRLA!
 	};
 	
 
