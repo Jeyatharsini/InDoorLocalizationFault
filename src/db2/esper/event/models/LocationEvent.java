@@ -1,12 +1,14 @@
 package db2.esper.event.models;
 
+import java.sql.Timestamp;
+
 public class LocationEvent {
 	
 	protected double x;
 	protected double y;
-	protected long timestamp;
+	protected Timestamp timestamp;
 	
-	public LocationEvent(double x, double y, long timestamp) {
+	public LocationEvent(double x, double y, Timestamp timestamp) {
 		this.x = x;
 		this.y = y;
 		this.timestamp = timestamp;

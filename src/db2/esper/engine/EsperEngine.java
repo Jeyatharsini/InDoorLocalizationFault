@@ -38,8 +38,10 @@ public class EsperEngine {
 //		EPStatement cepStatement =	cepAdm.createEPL(query);
 //		cepStatement.addListener(new CEPListener());
 		
+		String file[] = new String[1];
+		file[0] = "data/A/stateDump.txt";
 		
-		EventGenerator evGen = new EventGenerator(cepRT,args);
+		EventGenerator evGen = new EventGenerator(cepRT,file);
 		
 		evGen.start();
 		
