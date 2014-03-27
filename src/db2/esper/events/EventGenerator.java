@@ -30,9 +30,7 @@ public class EventGenerator extends Thread {
 	
 	protected EPRuntime cepRT;
 	protected String filePath;
-	protected int[] defaultSensorState={};
 	protected Scanner scanFile; 
-	protected String lastLine="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0";
 	
 	public EventGenerator(EPRuntime cepRT, String[] args) {
 		super();
@@ -53,7 +51,11 @@ public class EventGenerator extends Thread {
 	@Override
 	public void run(){
 		int second=0;
+		
 		LocationEvent event = null;
+		Timestamp timestamp = null;
+		Double positionX = null;
+		Double positionY = null;
 		
 		while(scanFile.hasNextLine()){
 			
@@ -69,11 +71,11 @@ public class EventGenerator extends Thread {
 				Pattern pattern = Pattern.compile("[0-9]+(\\.[0-9][0-9]?)?");
 				
 				Matcher matcher = pattern.matcher(token);
-				Timestamp timestamp = null;
 				if (matcher.find()) {
 					timestamp = new Timestamp((long) (Double.valueOf( matcher.group(0) ) * 1000));
 					System.out.println(timestamp);
 				}
+				
 				
 				// deviceID
 				token = scanner.next();
@@ -84,6 +86,7 @@ public class EventGenerator extends Thread {
 					deviceID = Integer.valueOf( matcher.group(0) );
 					System.out.println(deviceID);
 				}
+				
 				
 				token = scanner.next();
 				token = scanner.next();
@@ -103,15 +106,39 @@ public class EventGenerator extends Thread {
 				
 				event = new PirwEvent(timestamp, deviceID, status, 10, 10);
 				System.out.println(event.toString());
-				
+
+				scanner.close();
+
 			} else if(line.contains("PIRC")) {
 				System.out.println("PIRC");
 			} else if(line.contains("DOOR")) {
 				System.out.println("DOOR");
+			} else {
+				
+				Pattern pattern = Pattern.compile("[a-zA-Z\\_]+");
+				Matcher matcher = pattern.matcher(line);
+				
+				if ( !matcher.find() ) {
+					pattern = Pattern.compile( "([0-9]+) ([0-9]+\\.[0-9]+)? ([0-9]+\\.[0-9]+)?" );
+					matcher = pattern.matcher(line);
+					matcher.find();
+
+					timestamp = new Timestamp((Long.valueOf( matcher.group(1) ).longValue()));
+					positionX = new Double(matcher.group(2).toString());
+					positionY = new Double(matcher.group(3).toString());
+					
+					event = new LocationEvent(positionX, positionY, timestamp);
+					
+					System.out.println(event.toString());
+					
+				}
+				
 			}
 			
 
 		}
+		
+		//TODO temporizzazione degli eventi
 		
 		cepRT.sendEvent(event);
 	};

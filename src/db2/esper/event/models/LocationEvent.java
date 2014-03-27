@@ -4,13 +4,13 @@ import java.sql.Timestamp;
 
 public class LocationEvent {
 	
-	protected double x;
-	protected double y;
+	protected Double x;
+	protected Double y;
 	protected Timestamp timestamp;
 	
-	public LocationEvent(double x, double y, Timestamp timestamp) {
-		this.x = x;
-		this.y = y;
+	public LocationEvent(Double positionX, Double positionY, Timestamp timestamp) {
+		this.x = positionX;
+		this.y = positionY;
 		this.timestamp = timestamp;
 	}
 	

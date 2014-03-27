@@ -39,7 +39,9 @@ public class EsperEngine {
 //		cepStatement.addListener(new CEPListener());
 		
 		String file[] = new String[1];
-		file[0] = "data/A/stateDump.txt";
+		
+		//file[0] = "data/A/stateDump.txt";
+		file[0] = "data/A/LOC1395236845939.log";
 		
 		EventGenerator evGen = new EventGenerator(cepRT,file);
 		
