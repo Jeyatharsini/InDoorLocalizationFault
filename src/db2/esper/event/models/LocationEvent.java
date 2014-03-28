@@ -32,7 +32,7 @@ public class LocationEvent {
 
 	@Override
 	public String toString() {
-		return "GenericEvent [Position x= " + x + ", Position y= " + y + ", timestamp= " + timestamp + "]";
+		return "LocationEvent [Position x= " + x + ", Position y= " + y + ", timestamp= " + timestamp + "]";
 	}
 
 }

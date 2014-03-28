@@ -55,7 +55,12 @@ public class EsperEngine {
 		EPStatement locationEPL = cep.getEPAdministrator().createEPL(query);
 		
 		//QUERY PER TROVARE LE VARIE ANOMALIE
-		query = "SELECT * FROM locationEPL";
+		//query = "SELECT p.timestamp, p.deviceID "
+		//	  + "FROM pirwEPL.win:length(3) as p, LocationEvent.win:length(3) as l "
+		//	  + "WHERE p.timestamp = l.timestamp";
+		query = "SELECT * "
+			  + "FROM pirwEPL.win:time(30sec) "
+			  + "WHERE status IN (SELECT status FROM pircEPL.win:time(30sec))";
 		EPStatement onlyTrue = cep.getEPAdministrator().createEPL(query);
 		onlyTrue.addListener(mylistener);	//aggiunta del Listener che riceve la notifica di un evento e la stampa!
 
@@ -71,6 +76,9 @@ public class EsperEngine {
 		//siccome i due eventi possono essere contemporanei genero due thread separati
 		SensorEventGenerator sensorEventGenerator = new SensorEventGenerator(cepRT,files[0]);
 		LocationEventGenerator locationEventGenerator = new LocationEventGenerator(cepRT, files[1]); 
+		
+		sensorEventGenerator.setName("sensorThread");
+		locationEventGenerator.setName("locationThread");
 		
 		sensorEventGenerator.start();
 		locationEventGenerator.start();

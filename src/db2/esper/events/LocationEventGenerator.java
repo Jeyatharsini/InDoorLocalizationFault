@@ -13,11 +13,9 @@ public class LocationEventGenerator extends EventGenerator {
 	public LocationEventGenerator(EPRuntime cepRT, String filePath) {
 		super(cepRT, filePath);
 	}
-
-
 	
-	public void parseLog() {
-		
+	@Override
+	protected LocationEvent parseLine(String line) {
 		Pattern pattern = Pattern.compile("[a-zA-Z\\_]+");
 		Matcher matcher = pattern.matcher(line);
 		
@@ -26,15 +24,18 @@ public class LocationEventGenerator extends EventGenerator {
 			matcher = pattern.matcher(line);
 			matcher.find();
 
-			timestamp = new Timestamp((Long.valueOf( matcher.group(1) ).longValue()));
-			positionX = new Double(matcher.group(2).toString());
-			positionY = new Double(matcher.group(3).toString());
+			Timestamp timestamp = new Timestamp((Long.valueOf( matcher.group(1) ).longValue()));
+			Double positionX = new Double(matcher.group(2).toString());
+			Double positionY = new Double(matcher.group(3).toString());
 			
 			event = new LocationEvent(positionX, positionY, timestamp);
 			
 			if(verbose) System.out.println(event.toString());
-			
-	
+		}
+
+		return event;
+		
+		//TODO dammi un'occhiata ritorno degli eventi nulli...
 	}
 
 }

@@ -8,7 +8,7 @@ import com.espertech.esper.client.EPRuntime;
 
 import db2.esper.event.models.LocationEvent;
 
-public class EventGenerator extends Thread {
+public abstract class EventGenerator extends Thread {
 	
 	protected boolean verbose = false; //TRUE se vuoi debuggarmi
 	
@@ -44,23 +44,35 @@ public class EventGenerator extends Thread {
 
 	@Override
 	public void run() {
-
 		
-		//TODO temporizzazione degli eventi
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		cepRT.sendEvent(event);
+		while (scanner.hasNext()) {
+			event = parseLine(scanner.nextLine());
 
+			//TODO temporizzazione degli eventi
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
+			if (event != null)
+				cepRT.sendEvent(event);
+		
+		}
+		
+		//scanner.close();
+		//TODO in qualche modo questo thread va fermato...
 	}
 	
 	public float waitTime(LocationEvent firstEvent, LocationEvent secondEvent) {
 		float timeDifference = 1000;
 		//TODO calcolami in maniera efficente!
 		return timeDifference;
+	}
+	
+	protected LocationEvent parseLine(String line) {
+		//TODO override me!
+		return null;
 	}
 	
 }
