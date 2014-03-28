@@ -5,7 +5,7 @@ public class PirwEvent extends SensorEvent {
 	private final String CATEGORY_ID = "pirw";
 	private final int RADIUS = 10;
 	
-	public PirwEvent(float timestamp, int deviceID, boolean status, double x, double y) {
+	public PirwEvent(long timestamp, int deviceID, boolean status, double x, double y) {
 		super(timestamp, deviceID, status, x, y);
 		
 		this.radius = RADIUS;

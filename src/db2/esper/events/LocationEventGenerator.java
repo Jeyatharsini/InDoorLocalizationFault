@@ -9,21 +9,40 @@ import db2.esper.event.models.LocationEvent;
 
 public class LocationEventGenerator extends EventGenerator {
 
+	LocationEvent event;
+	
 	public LocationEventGenerator(EPRuntime cepRT, String filePath) {
 		super(cepRT, filePath);
 	}
 	
 	@Override
-	protected LocationEvent parseLine(String line) {
-		Pattern pattern = Pattern.compile("[a-zA-Z\\_]+");
-		Matcher matcher = pattern.matcher(line);
+	protected void generateEvent(String line) {
+		parseLine(line);
+		
+		if (event != null) {
+			
+			cepRT.sendEvent(event);
+
+			//qui il thread va a nanna per il tempo necessario a essere realtime
+			try {
+				Thread.sleep(getSleepTime(event.getTimestamp()));
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	protected void parseLine(String line) {
+		this.event = null;		
+		
+		Matcher matcher = Pattern.compile("[a-zA-Z\\_]+").matcher(line);
 		
 		if ( !matcher.find() ) {
-			pattern = Pattern.compile( "([0-9]+) ([0-9]+\\.[0-9]+)? ([0-9]+\\.[0-9]+)?" );
-			matcher = pattern.matcher(line);
+			matcher = Pattern.compile( "([0-9]+) ([0-9]+\\.[0-9]+)? ([0-9]+\\.[0-9]+)?" ).matcher(line);
 			matcher.find();
 
-			float timestamp = Float.valueOf(matcher.group(1)).floatValue();
+			long timestamp = Long.valueOf(matcher.group(1)).longValue();
 			double positionX = new Double(matcher.group(2).toString());
 			double positionY = new Double(matcher.group(3).toString());
 			
@@ -32,8 +51,6 @@ public class LocationEventGenerator extends EventGenerator {
 			if(verbose) System.out.println(event.toString());
 		}
 
-		return event;
-		
 		//TODO dammi un'occhiata ritorno degli eventi nulli...
 	}
 

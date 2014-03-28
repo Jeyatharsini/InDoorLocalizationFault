@@ -5,7 +5,7 @@ public class PircEvent extends SensorEvent {
 	private final String CATEGORY_ID = "pirc";
 	private final int RADIUS = 5;
 	
-	public PircEvent(float timestamp, int deviceID, boolean status, double x, double y) {
+	public PircEvent(long timestamp, int deviceID, boolean status, double x, double y) {
 		super(timestamp, deviceID, status, x, y);
 		
 		this.radius = RADIUS;

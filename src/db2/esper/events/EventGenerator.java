@@ -15,7 +15,8 @@ public abstract class EventGenerator extends Thread {
 	protected EPRuntime cepRT;
 	protected String filePath;
 	protected Scanner scanner;
-	protected LocationEvent event;
+	protected long sleepTime = 0;
+	protected long previousTimestamp = 0;
 	
 	/**
 	 * Constructor
@@ -34,45 +35,41 @@ public abstract class EventGenerator extends Thread {
 		}
 	}
 	
+	@Override
+	public void run() {	
+		while (this.scanner.hasNext()) {
+			generateEvent(this.scanner.nextLine());
+		}		
+		
+		this.scanner.close();
+		//TODO in qualche modo questo thread va fermato...
+	}
+	
 	/**
 	 * Initialize two scanners, one for each file to scan
 	 * @throws FileNotFoundException, if one files is not found
 	 */
 	private void setParsers() throws FileNotFoundException{
-		scanner = new Scanner(new File(filePath));
-	}
-
-	@Override
-	public void run() {
-		
-		while (scanner.hasNext()) {
-			event = parseLine(scanner.nextLine());
-
-			//TODO temporizzazione degli eventi
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			
-			if (event != null)
-				cepRT.sendEvent(event);
-		
-		}
-		
-		//scanner.close();
-		//TODO in qualche modo questo thread va fermato...
+		this.scanner = new Scanner(new File(filePath));
 	}
 	
-	public float waitTime(LocationEvent firstEvent, LocationEvent secondEvent) {
-		float timeDifference = 1000;
-		//TODO calcolami in maniera efficente!
-		return timeDifference;
+	/**
+	 * 
+	 * @param actualTimestamp
+	 * @return
+	 */
+	protected long getSleepTime(long actualTimestamp) {
+		if (previousTimestamp == 0) {
+			previousTimestamp = actualTimestamp;
+		} 
+		
+		this.sleepTime = actualTimestamp - previousTimestamp; 
+		previousTimestamp = actualTimestamp;
+		
+		return this.sleepTime;
 	}
 	
-	protected LocationEvent parseLine(String line) {
-		//TODO override me!
-		return null;
-	}
+	protected abstract void generateEvent(String line);
+	protected abstract void parseLine(String line); //non mi serve più in realtà...
 	
 }

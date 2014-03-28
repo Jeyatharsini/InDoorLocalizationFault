@@ -13,6 +13,7 @@ import db2.esper.event.models.DwcEvent;
 import db2.esper.event.models.LocationEvent;
 import db2.esper.event.models.PircEvent;
 import db2.esper.event.models.PirwEvent;
+import db2.esper.event.models.SensorEvent;
 import db2.esper.events.LocationEventGenerator;
 import db2.esper.events.SensorEventGenerator;
 
@@ -25,6 +26,9 @@ import db2.esper.events.SensorEventGenerator;
  */
 
 public class EsperEngine {
+	
+	public static boolean verbose = false;
+	
 	private final static String SENSOR_STATE_DUMP = "stateDump.txt";
 	
 	public static void main(String[] args) throws InterruptedException {		
@@ -38,21 +42,34 @@ public class EsperEngine {
 		EPServiceProvider cep = EPServiceProviderManager.getProvider("myCEP", getConfiguration());
 		EPRuntime cepRT = cep.getEPRuntime();
 		
-		Listener mylistener = new Listener();
+		Listener myListener = new Listener();
 		String query = null;
+		
+		/*
+		 * PROBLEMA: 
+		 * Se prendo una query che recupera solo gli eventi di un certo tipo, e ci attacco il listener
+		 * a consolle viene stampato un solo evento per tipo come è giusto che sia.
+		 * Se attivo tutte e 4 le query contemporaneamente e ad ogni query attacco lo stesso listener ottengo
+		 * un sacco di eventi duplicati.
+		 */
 		
 		//GENERAZIONE DEGLI STREAM PER CATEGORIA DI SENSORE
 		query = "INSERT INTO pirwEPL SELECT * FROM PirwEvent ";
+		//query = "SELECT * FROM LocationEvent";
 		EPStatement pirwEPL= cep.getEPAdministrator().createEPL(query);
-		
+//		if(verbose) pirwEPL.addListener(myListener);
+
 		query = "INSERT INTO pircEPL SELECT * FROM PircEvent ";
 		EPStatement pircEPL = cep.getEPAdministrator().createEPL(query);
-		
+//		if(verbose) pircEPL.addListener(myListener);
+
 		query = "INSERT into dwcEPL SELECT * FROM DwcEvent ";
 		EPStatement dwcEPL = cep.getEPAdministrator().createEPL(query);
-		
+//		if(verbose) dwcEPL.addListener(myListener);
+
 		query = "INSERT into locationEPL SELECT * FROM LocationEvent ";
 		EPStatement locationEPL = cep.getEPAdministrator().createEPL(query);
+		//if(verbose) locationEPL.addListener(myListener);
 		
 		//QUERY PER TROVARE LE VARIE ANOMALIE
 		//query = "SELECT p.timestamp, p.deviceID "
@@ -62,7 +79,7 @@ public class EsperEngine {
 			  + "FROM pirwEPL.win:time(30sec) "
 			  + "WHERE status IN (SELECT status FROM pircEPL.win:time(30sec))";
 		EPStatement onlyTrue = cep.getEPAdministrator().createEPL(query);
-		onlyTrue.addListener(mylistener);	//aggiunta del Listener che riceve la notifica di un evento e la stampa!
+		onlyTrue.addListener(myListener);	//aggiunta del Listener che riceve la notifica di un evento e la stampa!
 
 		//CARICAMENTO DEI FILE
 		String[] files = null;

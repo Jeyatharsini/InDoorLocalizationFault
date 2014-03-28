@@ -5,7 +5,7 @@ public class DwcEvent extends SensorEvent {
 	private final String CATEGORY_ID = "door"; //TODO toglimi sono antiestetico!
 	private final int RADIUS = 3;	// da capire se � da mettere o meno...
 	
-	public DwcEvent(float timestamp, int deviceID, boolean status, double x, double y) {
+	public DwcEvent(long timestamp, int deviceID, boolean status, double x, double y) {
 		super(timestamp, deviceID, status, x, y);
 		
 		this.radius = RADIUS;

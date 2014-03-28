@@ -5,7 +5,7 @@ public class FaultEvent extends LocationEvent {
 	private int sensorID;
 	private boolean rise;
 	
-	public FaultEvent(double x, double y, float timestamp, int sensorID,
+	public FaultEvent(double x, double y, long timestamp, int sensorID,
 			boolean rise) {
 		super(x, y, timestamp);
 		this.sensorID = sensorID;

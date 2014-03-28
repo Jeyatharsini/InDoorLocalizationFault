@@ -6,75 +6,100 @@ import java.util.regex.Pattern;
 import com.espertech.esper.client.EPRuntime;
 
 import db2.esper.event.models.DwcEvent;
-import db2.esper.event.models.LocationEvent;
 import db2.esper.event.models.PircEvent;
 import db2.esper.event.models.PirwEvent;
 
 public class SensorEventGenerator extends EventGenerator {
 	
-	private float timestamp = 0;
-	private int deviceID = 0;
-	private boolean status = false;
+	private long timestamp;
+	private int deviceID;
+	private boolean status;
 	
 	public SensorEventGenerator(EPRuntime cepRT, String filePath) {
 		super(cepRT, filePath);
 	}
 	
-	
 	@Override
-	protected LocationEvent parseLine(String line) {
+	protected void generateEvent(String line) {
+		
+		long actualTimestamp = 0;
+		
+		this.timestamp = 0;
+		this.deviceID = 0;
+		this.status = false;
+		
 		//fa il matching della linea con l'espressione regolare
-		matchLine(line);
-
+		parseLine(line);
+		
+		//a seconda del tipo di evento che sto parsando creo un oggetto evento diverso
 		if(line.contains("PIRW")) {
-			if(verbose) System.out.println("PIRW");
-			event = new PirwEvent(timestamp, deviceID, status, 10, 10);
+			PirwEvent event = new PirwEvent(timestamp, deviceID, status, 10, 10);
+			actualTimestamp = event.getTimestamp();
+			cepRT.sendEvent(event);
+			
 			if(verbose) System.out.println(event.toString());
+			
 		} else if(line.contains("PIRC")) {
-			if(verbose) System.out.println("PIRC");
-			event = new PircEvent(timestamp, deviceID, status, 10, 10);
+			PircEvent event = new PircEvent(timestamp, deviceID, status, 10, 10);
+			actualTimestamp = event.getTimestamp();
+			cepRT.sendEvent(event);
+			
 			if(verbose) System.out.println(event.toString());
+			
 		} else if(line.contains("DOOR")) {
-			if(verbose) System.out.println("DOOR");
-			event = new DwcEvent(timestamp, deviceID, status, 10, 10);
+			DwcEvent event = new DwcEvent(timestamp, deviceID, status, 10, 10);
+			actualTimestamp = event.getTimestamp();
+			cepRT.sendEvent(event);
+			
 			if(verbose) System.out.println(event.toString());
 		}
 		
-		return event;
+		if(actualTimestamp != 0) {
+			//qui il thread va a nanna per il tempo necessario a essere realtime
+			try {
+				Thread.sleep(getSleepTime(actualTimestamp));
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	/**
 	 * 
 	 * @param line
 	 */
-	private void matchLine(String line) {
+	protected void parseLine(String line) {
 		Pattern pattern = Pattern.compile(
 				"(TimeStamp|DeviceID|Status)=(([\\.0-9]+)|(PIRC|PIRW|DOOR|true|false))"
 				);
-		
+
 		Matcher matcher = pattern.matcher(line);
-		
 		/* dato il file d'ingresso sempre in questo formato, con questa RegEx ho sempre:
-		 * group(1): [1] timestamp, [2] value
-		 * group(2): [1] DeviceID, [2] value
-		 * group(3): [1] CategoryName, [2] value
-		 * group(4): [1] Status, [2] value
+		 * primo match: group(1) timestamp, group(2) value
+		 * secondo match: group(1) DeviceID, group(2) value
+		 * terzo match: group(1) CategoryName, group(2) value
+		 * quarto match: group(1) Status, group(2) value
 		 * Se si vuol essere zelanti si pu˜ fare un controllo che tutto combaci, 
 		 * ma noi siamo per le prestazioni pure quindi non lo facciamo.
 		 */
 		int i = 0;
-		verbose = true;
-		while (matcher.find()) {
-			if(verbose) System.out.println(matcher.group(2));
-			if (i == 0)
-				this.timestamp = Float.valueOf(matcher.group(2)).floatValue();
-			else if (i == 1)
+		while (matcher.find() && i < 3) {
+			
+			if (i == 0) {
+				if(verbose) System.out.println(matcher.group(2));
+				//ho bisogno di avere tutti i tempi in millisecondi, quindi devo fare questo passaggio
+				Double tempTimestamp = Double.valueOf(matcher.group(2)); 
+				tempTimestamp = tempTimestamp * 1000;
+				this.timestamp = tempTimestamp.longValue();
+			} else if (i == 1) {
+				if(verbose) System.out.println(matcher.group(2));
 				this.deviceID = Integer.valueOf(matcher.group(2)).intValue();
-			else if (i == 2)
+			} else if (i == 2) {
+				if(verbose) System.out.println(matcher.group(2));
 				this.status = Boolean.valueOf(matcher.group(2)).booleanValue();
+			}
 			
 			i++;
 		}
 	}
-
 }
