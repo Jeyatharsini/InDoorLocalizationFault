@@ -1,15 +1,15 @@
 package db2.esper.event.models;
 
-import java.sql.Timestamp;
+import java.text.DecimalFormat;
 
 public class LocationEvent {
 	
-	protected Double x;
-	protected Double y;
-	protected Timestamp timestamp;
+	protected double x;
+	protected double y;
+	protected float timestamp;
 	protected int radius = 0;
 	
-	public LocationEvent(Double positionX, Double positionY, Timestamp timestamp) {
+	public LocationEvent(double positionX, double positionY, float timestamp) {
 		this.x = positionX;
 		this.y = positionY;
 		this.timestamp = timestamp;
@@ -22,7 +22,7 @@ public class LocationEvent {
 		return y;
 	}
 
-	public Timestamp getTimestamp() {
+	public float getTimestamp() {
 		return timestamp;
 	}
 
@@ -32,7 +32,9 @@ public class LocationEvent {
 
 	@Override
 	public String toString() {
-		return "LocationEvent [Position x= " + x + ", Position y= " + y + ", timestamp= " + timestamp + "]";
+		DecimalFormat decimalFormat = new DecimalFormat("##########.##");
+		
+		return "LocationEvent [Position x= " + x + ", Position y= " + y + ", timestamp= " + decimalFormat.format(timestamp) + "]";
 	}
 
 }

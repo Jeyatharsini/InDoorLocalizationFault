@@ -1,6 +1,5 @@
 package db2.esper.events;
 
-import java.sql.Timestamp;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,9 +23,9 @@ public class LocationEventGenerator extends EventGenerator {
 			matcher = pattern.matcher(line);
 			matcher.find();
 
-			Timestamp timestamp = new Timestamp((Long.valueOf( matcher.group(1) ).longValue()));
-			Double positionX = new Double(matcher.group(2).toString());
-			Double positionY = new Double(matcher.group(3).toString());
+			float timestamp = Float.valueOf(matcher.group(1)).floatValue();
+			double positionX = new Double(matcher.group(2).toString());
+			double positionY = new Double(matcher.group(3).toString());
 			
 			event = new LocationEvent(positionX, positionY, timestamp);
 			

@@ -1,13 +1,11 @@
 package db2.esper.event.models;
 
-import java.sql.Timestamp;
-
 public class FaultEvent extends LocationEvent {
 	
 	private int sensorID;
 	private boolean rise;
 	
-	public FaultEvent(double x, double y, Timestamp timestamp, int sensorID,
+	public FaultEvent(double x, double y, float timestamp, int sensorID,
 			boolean rise) {
 		super(x, y, timestamp);
 		this.sensorID = sensorID;

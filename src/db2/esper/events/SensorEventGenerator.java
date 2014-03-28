@@ -1,7 +1,5 @@
 package db2.esper.events;
 
-import java.sql.Timestamp;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,7 +12,7 @@ import db2.esper.event.models.PirwEvent;
 
 public class SensorEventGenerator extends EventGenerator {
 	
-	private Timestamp timestamp = null;
+	private float timestamp = 0;
 	private int deviceID = 0;
 	private boolean status = false;
 	
@@ -25,30 +23,21 @@ public class SensorEventGenerator extends EventGenerator {
 	
 	@Override
 	protected LocationEvent parseLine(String line) {
+		//fa il matching della linea con l'espressione regolare
+		matchLine(line);
+
 		if(line.contains("PIRW")) {
 			if(verbose) System.out.println("PIRW");
-			
-			matchLine(line);
-			
 			event = new PirwEvent(timestamp, deviceID, status, 10, 10);
 			if(verbose) System.out.println(event.toString());
-
 		} else if(line.contains("PIRC")) {
 			if(verbose) System.out.println("PIRC");
-			
-			matchLine(line);			
-			
 			event = new PircEvent(timestamp, deviceID, status, 10, 10);
 			if(verbose) System.out.println(event.toString());
-
 		} else if(line.contains("DOOR")) {
 			if(verbose) System.out.println("DOOR");
-			
-			matchLine(line);
-	
 			event = new DwcEvent(timestamp, deviceID, status, 10, 10);
 			if(verbose) System.out.println(event.toString());
-
 		}
 		
 		return event;
@@ -59,48 +48,33 @@ public class SensorEventGenerator extends EventGenerator {
 	 * @param line
 	 */
 	private void matchLine(String line) {
-		Scanner scanner = new Scanner(line);
-		scanner.useDelimiter(",");
+		Pattern pattern = Pattern.compile(
+				"(TimeStamp|DeviceID|Status)=(([\\.0-9]+)|(PIRC|PIRW|DOOR|true|false))"
+				);
 		
-		// timestamp
-		String token = scanner.next();
-		Pattern pattern = Pattern.compile("[0-9]+(\\.[0-9][0-9]?)?");
+		Matcher matcher = pattern.matcher(line);
 		
-		Matcher matcher = pattern.matcher(token);
-		Timestamp timestamp = null;
-		if (matcher.find()) {
-			this.timestamp = new Timestamp((long) (Double.valueOf( matcher.group(0) ) * 1000));
-			if(verbose) System.out.println(timestamp);
-		}
-		
-		// deviceID
-		token = scanner.next();
-		pattern = Pattern.compile("[1-7]");
-		matcher = pattern.matcher(token);
-		int deviceID = 0;
-		if (matcher.find()) {
-			this.deviceID = Integer.valueOf( matcher.group(0) );
-			if(verbose) System.out.println(deviceID);
-		}
+		/* dato il file d'ingresso sempre in questo formato, con questa RegEx ho sempre:
+		 * group(1): [1] timestamp, [2] value
+		 * group(2): [1] DeviceID, [2] value
+		 * group(3): [1] CategoryName, [2] value
+		 * group(4): [1] Status, [2] value
+		 * Se si vuol essere zelanti si pu˜ fare un controllo che tutto combaci, 
+		 * ma noi siamo per le prestazioni pure quindi non lo facciamo.
+		 */
+		int i = 0;
+		verbose = true;
+		while (matcher.find()) {
+			if(verbose) System.out.println(matcher.group(2));
+			if (i == 0)
+				this.timestamp = Float.valueOf(matcher.group(2)).floatValue();
+			else if (i == 1)
+				this.deviceID = Integer.valueOf(matcher.group(2)).intValue();
+			else if (i == 2)
+				this.status = Boolean.valueOf(matcher.group(2)).booleanValue();
 			
-		token = scanner.next();
-		token = scanner.next();
-		token = scanner.next();
-		token = scanner.next();
-
-		//status
-		token = scanner.next();
-		Boolean status = null;
-		if (token.contains("false")) {
-			this.status = false;
-			if(verbose) System.out.println(status);
-		} else if (token.contains("true")) {
-			this.status = true;
-			if(verbose) System.out.println(status);
+			i++;
 		}
-		
-		scanner.close();
-		
 	}
-	
+
 }
