@@ -13,7 +13,6 @@ import db2.esper.event.models.DwcEvent;
 import db2.esper.event.models.LocationEvent;
 import db2.esper.event.models.PircEvent;
 import db2.esper.event.models.PirwEvent;
-import db2.esper.event.models.SensorEvent;
 import db2.esper.events.LocationEventGenerator;
 import db2.esper.events.SensorEventGenerator;
 

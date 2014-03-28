@@ -6,8 +6,6 @@ import java.util.Scanner;
 
 import com.espertech.esper.client.EPRuntime;
 
-import db2.esper.event.models.LocationEvent;
-
 public abstract class EventGenerator extends Thread {
 	
 	protected boolean verbose = false; //TRUE se vuoi debuggarmi
@@ -42,7 +40,7 @@ public abstract class EventGenerator extends Thread {
 		}		
 		
 		this.scanner.close();
-		//TODO in qualche modo questo thread va fermato...
+		//TODO in qualche modo questo thread va fermato quando ho finito gli eventi...
 	}
 	
 	/**
@@ -54,9 +52,9 @@ public abstract class EventGenerator extends Thread {
 	}
 	
 	/**
-	 * 
-	 * @param actualTimestamp
-	 * @return
+	 * Calculate the sleep time between two different events
+	 * @param actualTimestamp, long, event timestamp
+	 * @return long, sleep time in millisec
 	 */
 	protected long getSleepTime(long actualTimestamp) {
 		if (previousTimestamp == 0) {
