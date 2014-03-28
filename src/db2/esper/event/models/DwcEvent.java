@@ -9,11 +9,14 @@ public class DwcEvent extends SensorEvent {
 	
 	public DwcEvent(Timestamp timestamp, int deviceID, boolean status, double x, double y) {
 		super(timestamp, deviceID, status, x, y);
+		
+		this.radius = RADIUS;
+		this.categoryID = CATEGORY_ID;
 	}
 
 	@Override
 	public String toString() {
-		return "Dwc [CATEGORY_ID=" + CATEGORY_ID + ", RADIUS=" + RADIUS
+		return "Dwc [Category=" + categoryID + ", Radius=" + radius
 				+ ", deviceID=" + deviceID + ", status=" + status + ", x=" + x
 				+ ", y=" + y + ", timestamp=" + timestamp + "]";
 	}	

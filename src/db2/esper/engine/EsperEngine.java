@@ -13,7 +13,8 @@ import db2.esper.event.models.DwcEvent;
 import db2.esper.event.models.LocationEvent;
 import db2.esper.event.models.PircEvent;
 import db2.esper.event.models.PirwEvent;
-import db2.esper.events.EventGenerator;
+import db2.esper.events.LocationEventGenerator;
+import db2.esper.events.SensorEventGenerator;
 
 /* Rilevamenti:
  * A: senza fault
@@ -66,9 +67,13 @@ public class EsperEngine {
 			e.printStackTrace();
 		}
 		
-		//AVVIO DEL GENERATORE DI EVENTI
-		EventGenerator evGen = new EventGenerator(cepRT,files);
-		evGen.start();		
+		//AVVIO DEI GENERATORI DI EVENTI
+		//siccome i due eventi possono essere contemporanei genero due thread separati
+		SensorEventGenerator sensorEventGenerator = new SensorEventGenerator(cepRT,files[0]);
+		LocationEventGenerator locationEventGenerator = new LocationEventGenerator(cepRT, files[1]); 
+		
+		sensorEventGenerator.start();
+		locationEventGenerator.start();
 	}
 	
 	/**
@@ -89,7 +94,7 @@ public class EsperEngine {
 	/**
 	 * Load the log file in the given directory stateDump.txt and LOC[0-9]+.log
 	 * @param path String, the path where the log files are
-	 * @return String[], with the full path of the two files
+	 * @return String[], full path of the files [0]: stateDump file, [1]: location log file
 	 * @throws FileNotFoundException if one of the two files is not in the directory
 	 */
 	private static String[] loadLogFiles(String path) throws FileNotFoundException {

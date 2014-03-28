@@ -7,6 +7,7 @@ public class LocationEvent {
 	protected Double x;
 	protected Double y;
 	protected Timestamp timestamp;
+	protected int radius = 0;
 	
 	public LocationEvent(Double positionX, Double positionY, Timestamp timestamp) {
 		this.x = positionX;
@@ -19,6 +20,14 @@ public class LocationEvent {
 	}
 	public double getY() {
 		return y;
+	}
+
+	public Timestamp getTimestamp() {
+		return timestamp;
+	}
+
+	public int getRadius() {
+		return radius;
 	}
 
 	@Override

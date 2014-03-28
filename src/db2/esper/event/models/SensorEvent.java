@@ -6,6 +6,7 @@ public abstract class SensorEvent extends LocationEvent {
 	
 	protected int deviceID;
 	protected boolean status;
+	protected String categoryID = null;
 
 	public SensorEvent(Timestamp timestamp, int deviceID, boolean status, double x, double y) {
 		super(x, y, timestamp);
@@ -21,5 +22,8 @@ public abstract class SensorEvent extends LocationEvent {
 	public boolean isStatus() {
 		return status;
 	}	
-
+	
+	public String getCategoryID() {
+		return categoryID;
+	}
 }
