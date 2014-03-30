@@ -51,7 +51,6 @@ public class LocationEventGenerator extends EventGenerator {
 			if(verbose) System.out.println(event.toString());
 		}
 
-		//TODO dammi un'occhiata ritorno degli eventi nulli...
 	}
 
 }

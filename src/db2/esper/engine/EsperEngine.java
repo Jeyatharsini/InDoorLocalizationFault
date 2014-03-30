@@ -89,7 +89,7 @@ public class EsperEngine {
 		}
 		
 		//AVVIO DEI GENERATORI DI EVENTI
-		//siccome i due eventi possono essere contemporanei genero due thread separati
+		//siccome i due eventi location e sensor possono essere contemporanei genero due thread separati
 		SensorEventGenerator sensorEventGenerator = new SensorEventGenerator(cepRT,files[0]);
 		LocationEventGenerator locationEventGenerator = new LocationEventGenerator(cepRT, files[1]); 
 		
