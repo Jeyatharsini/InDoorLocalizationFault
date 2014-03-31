@@ -3,6 +3,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.BasicConfigurator;
+
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.client.EPServiceProvider;
@@ -30,7 +32,10 @@ public class EsperEngine {
 	
 	private final static String SENSOR_STATE_DUMP = "stateDump.txt";
 	
-	public static void main(String[] args) throws InterruptedException {		
+	public static void main(String[] args) throws InterruptedException {
+		//inizializzazione di log4j richiesta da Esper, a noi non serve in realtà...
+		BasicConfigurator.configure(); 
+		
 		//se in args non è stata passato nessun percorso valido, carica i file di default
 		String path = null;
 		if(args.length == 0) 
@@ -52,25 +57,24 @@ public class EsperEngine {
 		 * un sacco di eventi duplicati.
 		 */
 		
-		//GENERAZIONE DEGLI STREAM PER CATEGORIA DI SENSORE
+		//Qualche query per testare che tutto funzioni...
 		query = "INSERT INTO pirwEPL SELECT * FROM PirwEvent ";
 		//query = "SELECT * FROM LocationEvent";
 		EPStatement pirwEPL= cep.getEPAdministrator().createEPL(query);
-//		if(verbose) pirwEPL.addListener(myListener);
+		//if(verbose) pirwEPL.addListener(myListener);
 
 		query = "INSERT INTO pircEPL SELECT * FROM PircEvent ";
 		EPStatement pircEPL = cep.getEPAdministrator().createEPL(query);
-//		if(verbose) pircEPL.addListener(myListener);
+		//if(verbose) pircEPL.addListener(myListener);
 
 		query = "INSERT into dwcEPL SELECT * FROM DwcEvent ";
 		EPStatement dwcEPL = cep.getEPAdministrator().createEPL(query);
-//		if(verbose) dwcEPL.addListener(myListener);
+		//if(verbose) dwcEPL.addListener(myListener);
 
 		query = "INSERT into locationEPL SELECT * FROM LocationEvent ";
 		EPStatement locationEPL = cep.getEPAdministrator().createEPL(query);
 		//if(verbose) locationEPL.addListener(myListener);
 		
-		//QUERY PER TROVARE LE VARIE ANOMALIE
 		//query = "SELECT p.timestamp, p.deviceID "
 		//	  + "FROM pirwEPL.win:length(3) as p, LocationEvent.win:length(3) as l "
 		//	  + "WHERE p.timestamp = l.timestamp";
