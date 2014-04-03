@@ -3,6 +3,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.regex.Pattern;
 
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+
 import org.apache.log4j.BasicConfigurator;
 
 import com.espertech.esper.client.Configuration;
@@ -17,6 +20,7 @@ import db2.esper.event.models.PircEvent;
 import db2.esper.event.models.PirwEvent;
 import db2.esper.events.LocationEventGenerator;
 import db2.esper.events.SensorEventGenerator;
+import db2.esper.graphic2d.Map;
 
 /* Rilevamenti:
  * A: senza fault
@@ -31,8 +35,16 @@ public class EsperEngine {
 	public static boolean verbose = false;
 	
 	private final static String SENSOR_STATE_DUMP = "stateDump.txt";
-	
+   
 	public static void main(String[] args) throws InterruptedException {
+		//inizializzo la grafica, la mostrer˜ quando sarˆ possibile per non rallentare il caricamento dell'app
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				createAndShowGUI();
+			}
+		});
+		
 		//inizializzazione di log4j richiesta da Esper, a noi non serve in realtˆ...
 		BasicConfigurator.configure(); 
 		
@@ -158,5 +170,23 @@ public class EsperEngine {
 			return ( filePattern.matcher( dir[i] ).find() )?dir[i]:lookForLOCFile(dir, filePattern, i++);
 		else
 			throw new FileNotFoundException("LOC file mancante!");
+	}
+	
+	/**
+	 * Initialize and create the window that is needed to show the map
+	 */
+	private static void createAndShowGUI() {
+		int width = 400;
+		int height = 400;
+		JFrame window = new JFrame("Esper In Door Localization Simulator");
+       
+		//setup the window dimension
+		window.setSize(width, height);
+
+		//add the map panel
+		window.getContentPane().add(new Map(width, height));
+
+		//display the window
+		window.setVisible(true);    
 	}
 }
