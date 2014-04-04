@@ -1,5 +1,7 @@
 package db2.esper.event.models;
 
+import db2.esper.util.SensorParsedData;
+
 public abstract class SensorEvent {
 	
 	protected double x;
@@ -10,14 +12,15 @@ public abstract class SensorEvent {
 	protected boolean status;
 	protected String categoryID = null;
 
-	public SensorEvent(long timestamp, int deviceID, boolean status, double x, double y) {
+	public SensorEvent(SensorParsedData sensorParsedData) {
 
-		this.x = x;
-		this.y = y;
-		this.timestamp = timestamp;
+		this.x = sensorParsedData.getX();
+		this.y = sensorParsedData.getY();
+		this.timestamp = sensorParsedData.getTimestamp();
 
-		this.deviceID = deviceID;
-		this.status = status;
+		this.deviceID = sensorParsedData.getDeviceID();
+		this.status = sensorParsedData.isStatus();
+		
 	}
 	
 	public double getX() {

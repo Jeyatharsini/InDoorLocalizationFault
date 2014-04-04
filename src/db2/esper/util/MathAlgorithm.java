@@ -1,4 +1,4 @@
-package db2.esper.math;
+package db2.esper.util;
 
 /**
  * A collection of algorithm to do the math calculation behind the anomaly detection:

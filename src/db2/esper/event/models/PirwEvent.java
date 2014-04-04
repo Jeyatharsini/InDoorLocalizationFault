@@ -1,15 +1,16 @@
 package db2.esper.event.models;
 
+import db2.esper.util.SensorParsedData;
+
 public class PirwEvent extends SensorEvent {
 	
-	private final String CATEGORY_ID = "pirw";
 	private final int RADIUS = 10;
 	
-	public PirwEvent(long timestamp, int deviceID, boolean status, double x, double y) {
-		super(timestamp, deviceID, status, x, y);
+	public PirwEvent(SensorParsedData sensorParsedData) {
+		super(sensorParsedData);
 		
 		this.radius = RADIUS;
-		this.categoryID = CATEGORY_ID;
+		this.categoryID = sensorParsedData.getCategoryName();
 	}
 
 	@Override

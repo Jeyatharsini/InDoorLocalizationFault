@@ -44,7 +44,7 @@ public abstract class EventGenerator extends Thread {
 	}
 	
 	/**
-	 * Initialize two scanners, one for each file to scan
+	 * Initialize the scanner
 	 * @throws FileNotFoundException, if one files is not found
 	 */
 	private void setParsers() throws FileNotFoundException{
@@ -68,6 +68,5 @@ public abstract class EventGenerator extends Thread {
 	}
 	
 	protected abstract void generateEvent(String line);
-	protected abstract void parseLine(String line); //non mi serve più in realtà...
 	
 }

@@ -1,15 +1,16 @@
 package db2.esper.event.models;
 
+import db2.esper.util.SensorParsedData;
+
 public class PircEvent extends SensorEvent {
 
-	private final String CATEGORY_ID = "pirc";
 	private final int RADIUS = 5;
 	
-	public PircEvent(long timestamp, int deviceID, boolean status, double x, double y) {
-		super(timestamp, deviceID, status, x, y);
+	public PircEvent(SensorParsedData sensorParsedData) {
+		super(sensorParsedData);
 		
 		this.radius = RADIUS;
-		this.categoryID = CATEGORY_ID;
+		this.categoryID = sensorParsedData.getCategoryName();
 	}
 
 	@Override

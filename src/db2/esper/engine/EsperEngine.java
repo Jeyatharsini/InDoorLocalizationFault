@@ -28,7 +28,7 @@ import db2.esper.events.SensorEventGenerator;
 
 public class EsperEngine {
 	
-	public static boolean verbose = false;
+	public static final boolean VERBOSE = false;
 	
 	private final static String SENSOR_STATE_DUMP = "stateDump.txt";
 	
@@ -94,6 +94,7 @@ public class EsperEngine {
 		
 		//AVVIO DEI GENERATORI DI EVENTI
 		//siccome i due eventi location e sensor possono essere contemporanei genero due thread separati
+		//TODO qui mi deve inviare anche il path del file con posizioni dei sensori
 		SensorEventGenerator sensorEventGenerator = new SensorEventGenerator(cepRT,files[0]);
 		LocationEventGenerator locationEventGenerator = new LocationEventGenerator(cepRT, files[1]); 
 		

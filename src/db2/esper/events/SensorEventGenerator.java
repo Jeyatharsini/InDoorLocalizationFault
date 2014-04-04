@@ -1,13 +1,12 @@
 package db2.esper.events;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.espertech.esper.client.EPRuntime;
 
 import db2.esper.event.models.DwcEvent;
 import db2.esper.event.models.PircEvent;
 import db2.esper.event.models.PirwEvent;
+import db2.esper.util.Parse;
+import db2.esper.util.SensorParsedData;
 
 public class SensorEventGenerator extends EventGenerator {
 	
@@ -22,12 +21,11 @@ public class SensorEventGenerator extends EventGenerator {
 	 * Per le posizioni, se sono date in un file di testo, si pu˜ fare il parsing del file
 	 * e creare una mappa con {ID sensore: posizioneX, posizioneY} da qui poi ogni volta
 	 * che si crea un nuovo tipo di evento, fare il match tra gli ID e assegnare le posizioni. 
+	 * 
+	 * 
 	 */
 	
-	private long timestamp;
-	private int deviceID;
-	private boolean status;
-	
+	//TODO qui mi deve arrivare anche il path del file con posizioni dei sensori
 	public SensorEventGenerator(EPRuntime cepRT, String filePath) {
 		super(cepRT, filePath);
 	}
@@ -39,86 +37,36 @@ public class SensorEventGenerator extends EventGenerator {
 	@Override
 	protected void generateEvent(String line) {
 		
-		long actualTimestamp = 0;
+		//fa il matching della linea con l'espressione regolare e mi ritorna tutti i dati
+		SensorParsedData sensorParsedData = Parse.sensorStatusLine(line);
 		
-		this.timestamp = 0;
-		this.deviceID = 0;
-		this.status = false;
+		//----> qui devi aggiungere le posizioni ai sensori Parse.qualcosa(sensorParseData, pathFile);
 		
-		//fa il matching della linea con l'espressione regolare
-		parseLine(line);
-		
-		//a seconda del tipo di evento che sto parsando creo un oggetto evento diverso
-		if(line.contains("PIRW")) {
-			PirwEvent event = new PirwEvent(timestamp, deviceID, status, 10, 10);
-			actualTimestamp = event.getTimestamp();
-			cepRT.sendEvent(event);
+		//a seconda del tipo di evento che ho parsando creo un oggetto evento diverso
+		if(sensorParsedData.getCategoryName().equalsIgnoreCase("PIRW")) {
+			PirwEvent pirwEvent = new PirwEvent(sensorParsedData);
+			cepRT.sendEvent(pirwEvent);
 			
-			if(verbose) System.out.println(event.toString());
+			if(verbose) System.out.println(pirwEvent.toString());
 			
-		} else if(line.contains("PIRC")) {
-			PircEvent event = new PircEvent(timestamp, deviceID, status, 10, 10);
-			actualTimestamp = event.getTimestamp();
-			cepRT.sendEvent(event);
+		} else if(sensorParsedData.getCategoryName().equalsIgnoreCase("PIRC")) {
+			PircEvent pircEvent = new PircEvent(sensorParsedData);
+			cepRT.sendEvent(pircEvent);
 			
-			if(verbose) System.out.println(event.toString());
+			if(verbose) System.out.println(pircEvent.toString());
 			
-		} else if(line.contains("DOOR")) {
-			DwcEvent event = new DwcEvent(timestamp, deviceID, status, 10, 10);
-			actualTimestamp = event.getTimestamp();
-			cepRT.sendEvent(event);
+		} else if(sensorParsedData.getCategoryName().equalsIgnoreCase("DOOR")) {
+			DwcEvent dwcEvent = new DwcEvent(sensorParsedData);
+			cepRT.sendEvent(dwcEvent);
 			
-			if(verbose) System.out.println(event.toString());
+			if(verbose) System.out.println(dwcEvent.toString());
 		}
 		
-		if(actualTimestamp != 0) {
-			//qui il thread va a nanna per il tempo necessario a essere realtime
-			try {
-				Thread.sleep(getSleepTime(actualTimestamp));
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	/**
-	 * Parser of the actual line of the txt file, it take the line and matches it
-	 * against a RegEx to get the value of TimeStamp, DeviceID e Status.
-	 * @param line String, the actual string
-	 */
-	@Override
-	protected void parseLine(String line) {
-		Pattern pattern = Pattern.compile(
-				"(TimeStamp|DeviceID|Status)=(([\\.0-9]+)|(PIRC|PIRW|DOOR|true|false))"
-				);
-
-		Matcher matcher = pattern.matcher(line);
-		/* dato il file d'ingresso sempre in questo formato, con questa RegEx ho sempre:
-		 * primo match: group(1) timestamp, group(2) value
-		 * secondo match: group(1) DeviceID, group(2) value
-		 * terzo match: group(1) CategoryName, group(2) value
-		 * quarto match: group(1) Status, group(2) value
-		 * Se si vuol essere zelanti si pu˜ fare un controllo che tutto combaci, 
-		 * ma noi siamo per le prestazioni pure quindi non lo facciamo.
-		 */
-		int i = 0;
-		while (matcher.find() && i < 3) {
-			
-			if (i == 0) {
-				if(verbose) System.out.println(matcher.group(2));
-				//ho bisogno di avere tutti i tempi in millisecondi, quindi devo fare questo passaggio
-				Double tempTimestamp = Double.valueOf(matcher.group(2)); 
-				tempTimestamp = tempTimestamp * 1000;
-				this.timestamp = tempTimestamp.longValue();
-			} else if (i == 1) {
-				if(verbose) System.out.println(matcher.group(2));
-				this.deviceID = Integer.valueOf(matcher.group(2)).intValue();
-			} else if (i == 2) {
-				if(verbose) System.out.println(matcher.group(2));
-				this.status = Boolean.valueOf(matcher.group(2)).booleanValue();
-			}
-			
-			i++;
+		//qui il thread va a nanna per il tempo necessario a essere realtime
+		try {
+			Thread.sleep(getSleepTime(sensorParsedData.getTimestamp())); //get the actual Timestamp
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 }
