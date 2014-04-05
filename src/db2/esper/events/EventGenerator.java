@@ -6,9 +6,11 @@ import java.util.Scanner;
 
 import com.espertech.esper.client.EPRuntime;
 
+import db2.esper.engine.EsperEngine;
+
 public abstract class EventGenerator extends Thread {
 	
-	protected boolean verbose = false; //TRUE se vuoi debuggarmi
+	protected boolean verbose = EsperEngine.VERBOSE;
 	
 	protected EPRuntime cepRT;
 	protected String filePath;

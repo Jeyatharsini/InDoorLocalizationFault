@@ -53,4 +53,12 @@ public class SensorParsedData {
 		this.y = y;
 	}
 	
+	@Override
+	public String toString() {
+		return "SensorParsedData [timestamp=" + timestamp + ", deviceID="
+				+ deviceID + ", zoneName=" + zoneName + ", categoryName="
+				+ categoryName + ", status=" + status + ", x=" + x + ", y=" + y
+				+ "]";
+	}
+	
 }

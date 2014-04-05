@@ -1,7 +1,10 @@
 package db2.esper.util;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +33,6 @@ public class Parse {
 		/* dato il file d'ingresso sempre in questo formato, con questa RegEx ho sempre:
 		 * primo match: group(1) timestamp, group(2) value
 		 * secondo match: group(1) DeviceID, group(2) value
-		 * terzo match: group(1) ZoneName, group(2) value
 		 * quarto match: group(1) CategoryName, group(2) value
 		 * quinto match: group(1) Status, group(2) value
 		 * Se si vuol essere zelanti si pu˜ fare un controllo che tutto combaci, 
@@ -50,11 +52,8 @@ public class Parse {
 				sensorParsedData.setDeviceID(Integer.valueOf(matcher.group(2)).intValue());
 			} else if (i == 2) {
 				if(verbose) System.out.println(matcher.group(2));
-				sensorParsedData.setZoneName(String.valueOf(matcher.group(2)));
-			} else if (i == 3) {
-				if(verbose) System.out.println(matcher.group(2));
 				sensorParsedData.setCategoryName(String.valueOf(matcher.group(2)));
-			} else if (i == 4) {
+			} else if (i == 3) {
 				if(verbose) System.out.println(matcher.group(2));
 				sensorParsedData.setStatus(Boolean.valueOf(matcher.group(2)).booleanValue());
 			}
@@ -71,7 +70,6 @@ public class Parse {
 	 * @return LoccationEvent with the specific position
 	 */
 	public static LocationEvent locationLine (String line) {
-		
 		boolean verbose = EsperEngine.VERBOSE;
 		LocationEvent locationEvent = null;		
 		
@@ -96,9 +94,34 @@ public class Parse {
 		
 	}
 
-	public static Map<String, double[]> sensorPositionFile(String path) {
+	public static Map<String, double[]> sensorPositionFile(String path) throws FileNotFoundException {
+		boolean verbose = EsperEngine.VERBOSE;
 		Map<String, double[]> sensorsPosition = new HashMap<String, double[]>();
+		String line = null;	//rappresenta l'attuale riga che sto leggendo dal file
+		Matcher match = null;
+		/*
+		 * Estrae nell'ordine:
+		 * group(1): device Name
+		 * group(2): coordinata x
+		 * group(3): coordinata y
+		 */
+		Pattern pattern = Pattern.compile("\\'(.+)\\'\\t([0-9]+\\.[0-9]+)?\\t([0-9]+\\.[0-9]+)?");
+		Scanner scanner = new Scanner( new File( path ) );	// apro il file
 		
+		do {
+			line = scanner.nextLine();	// estrae la prossima linea
+			match = pattern.matcher(line);	// fa il match dell'espressione regolare
+			double[] coordinates = new double[2];
+			
+			if ( match.find() ) {
+				coordinates[0] = new Double(match.group(2).toString());
+				coordinates[1] = new Double(match.group(3).toString());
+				
+				if(verbose) System.out.println(coordinates[0]);
+				
+				sensorsPosition.put(match.group(1), coordinates);
+			}
+		} while(scanner.hasNext());
 		
 		return sensorsPosition;
 	}
