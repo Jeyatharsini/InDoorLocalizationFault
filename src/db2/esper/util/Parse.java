@@ -1,9 +1,11 @@
 package db2.esper.util;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import db2.esper.common.SensorParsedData;
 import db2.esper.engine.EsperEngine;
 import db2.esper.event.models.LocationEvent;
 
@@ -42,19 +44,19 @@ public class Parse {
 				//ho bisogno di avere tutti i tempi in millisecondi, quindi devo fare questo passaggio
 				Double tempTimestamp = Double.valueOf(matcher.group(2)); 
 				tempTimestamp = tempTimestamp * 1000;
-				sensorParsedData.timestamp= tempTimestamp.longValue();
+				sensorParsedData.setTimestamp(tempTimestamp.longValue());
 			} else if (i == 1) {
 				if(verbose) System.out.println(matcher.group(2));
-				sensorParsedData.deviceID = Integer.valueOf(matcher.group(2)).intValue();
+				sensorParsedData.setDeviceID(Integer.valueOf(matcher.group(2)).intValue());
 			} else if (i == 2) {
 				if(verbose) System.out.println(matcher.group(2));
-				sensorParsedData.zoneName = String.valueOf(matcher.group(2));
+				sensorParsedData.setZoneName(String.valueOf(matcher.group(2)));
 			} else if (i == 3) {
 				if(verbose) System.out.println(matcher.group(2));
-				sensorParsedData.categoryName = String.valueOf(matcher.group(2));
+				sensorParsedData.setCategoryName(String.valueOf(matcher.group(2)));
 			} else if (i == 4) {
 				if(verbose) System.out.println(matcher.group(2));
-				sensorParsedData.status = Boolean.valueOf(matcher.group(2)).booleanValue();
+				sensorParsedData.setStatus(Boolean.valueOf(matcher.group(2)).booleanValue());
 			}
 			
 			i++;
@@ -94,8 +96,10 @@ public class Parse {
 		
 	}
 
-	public static HashMap<String, double[]> sensorPositionFile(String path) {
-		return null;
+	public static Map<String, double[]> sensorPositionFile(String path) {
+		Map<String, double[]> sensorsPosition = new HashMap<String, double[]>();
 		
+		
+		return sensorsPosition;
 	}
 }

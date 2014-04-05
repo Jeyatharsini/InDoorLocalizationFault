@@ -1,14 +1,14 @@
-package db2.esper.util;
+package db2.esper.common;
 
 public class SensorParsedData {
 	
-	long timestamp = 0;
-	int deviceID = 0;
-	String zoneName = null;
-	String categoryName = null;
-	boolean status = false;
-	double x = 0;
-	double y = 0;
+	private long timestamp = 0;
+	private int deviceID = 0;
+	private String zoneName = null;
+	private String categoryName = null;
+	private boolean status = false;
+	private double x = 0;
+	private double y = 0;
 	
 	public long getTimestamp() {
 		return timestamp;

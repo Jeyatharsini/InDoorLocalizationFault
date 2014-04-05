@@ -1,6 +1,9 @@
 package db2.esper.engine;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.BasicConfigurator;
@@ -29,8 +32,26 @@ import db2.esper.events.SensorEventGenerator;
 public class EsperEngine {
 	
 	public static final boolean VERBOSE = false;
+
+	// i nomi dei file che servono per far funzionare il tutto, meno il log delle LOC
+	private static final String SENSOR_STATE_DUMP = "stateDump.txt";
+	private static final String SENSOR_POSITION_FILE = "zwave_pos.txt";
+	private static final String WALLS_POSITION_FILE = "walls.txt";
 	
-	private final static String SENSOR_STATE_DUMP = "stateDump.txt";
+	/* dato che avevamo preparato il codice per usare i deviceID, ma nel file c'è il deviceName
+	 * per non riscrivere l'espressione regolare abbiamo fatto questa Map
+	 * che fa corrispondere a ciascun deviceName il suo deviceID
+	 */
+	public static final String[] sensorIdToName = {
+		null,	// per far tornare i conti mi serve riempire lo zero :-) 
+		"PIRC 2.12", 		// 1
+		"PIRW corridor", 	// 2
+		"PIRW Salice", 		// 3
+		"PIRW wc", 			// 4
+		"Door Salice", 		// 5
+		"DOOR wc",			// 6
+		"Door 2.12"			// 7
+		};
 	
 	public static void main(String[] args) throws InterruptedException {
 		//inizializzazione di log4j richiesta da Esper, a noi non serve in realtà...
@@ -38,10 +59,11 @@ public class EsperEngine {
 		
 		//se in args non è stata passato nessun percorso valido, carica i file di default
 		String path = null;
-		if(args.length == 0) 
+		if(args.length == 0) {
 			path = "data/A"; //cambiami per caricare gli altri test case
-		else
+		} else {
 			path = args[0]; //Zanero NON sarebbe orgoglioso di te...
+		}
 		
 		EPServiceProvider cep = EPServiceProviderManager.getProvider("myCEP", getConfiguration());
 		EPRuntime cepRT = cep.getEPRuntime();
@@ -85,7 +107,7 @@ public class EsperEngine {
 		onlyTrue.addListener(myListener);	//aggiunta del Listener che riceve la notifica di un evento e la stampa!
 
 		//CARICAMENTO DEI FILE
-		String[] files = null;
+		HashMap<String, String> files = null;
 		try {
 			files = loadLogFiles(path);
 		} catch (FileNotFoundException e) {
@@ -94,9 +116,8 @@ public class EsperEngine {
 		
 		//AVVIO DEI GENERATORI DI EVENTI
 		//siccome i due eventi location e sensor possono essere contemporanei genero due thread separati
-		//TODO qui mi deve inviare anche il path del file con posizioni dei sensori
-		SensorEventGenerator sensorEventGenerator = new SensorEventGenerator(cepRT,files[0]);
-		LocationEventGenerator locationEventGenerator = new LocationEventGenerator(cepRT, files[1]); 
+		SensorEventGenerator sensorEventGenerator = new SensorEventGenerator(cepRT,files.get("sensorState"), files.get("sensorPosition"));
+		LocationEventGenerator locationEventGenerator = new LocationEventGenerator(cepRT, files.get("location")); 
 		
 		sensorEventGenerator.setName("sensorThread");
 		locationEventGenerator.setName("locationThread");
@@ -126,9 +147,11 @@ public class EsperEngine {
 	 * @return String[], full path of the files [0]: stateDump file, [1]: location log file
 	 * @throws FileNotFoundException if one of the two files is not in the directory
 	 */
-	private static String[] loadLogFiles(String path) throws FileNotFoundException {
-		String files[] = new String[2]; //variabile di return
-		Pattern filePattern = Pattern.compile("LOC[0-9]+.log"); //pattern del nome per il file loc
+	private static HashMap<String, String> loadLogFiles(String path) throws FileNotFoundException {
+		HashMap<String, String> files = new HashMap<String, String>(); //variabile di return
+		
+		//pattern del nome per il file loc
+		Pattern filePattern = Pattern.compile("LOC[0-9]+.log"); 
 		
 		//ottengo la lista dei file
 		String[] dir = new File(path).list();
@@ -137,12 +160,23 @@ public class EsperEngine {
 		String locFilename = lookForLOCFile(dir, filePattern, 0);
 		
 		//cerco il dump dello stato dei sensori nella cartella
-		if (!(new File(path+"/"+SENSOR_STATE_DUMP).isFile()))
+		if (!(new File(path + "/" + SENSOR_STATE_DUMP).isFile()))
 			throw new FileNotFoundException(SENSOR_STATE_DUMP + " file, mancante!");
 		
+		//cerco il dump dello stato dei sensori nella cartella
+		if (!(new File("data/" + SENSOR_POSITION_FILE).isFile()))
+			throw new FileNotFoundException(SENSOR_POSITION_FILE + " file, mancante!");
+		
+		//cerco il dump dello stato dei sensori nella cartella
+		if (!(new File("data/" + WALLS_POSITION_FILE).isFile()))
+			throw new FileNotFoundException(WALLS_POSITION_FILE + " file, mancante!");
+		
 		//preparo i risultati per il return
-		files[0] = path + "/" + SENSOR_STATE_DUMP; 
-		files[1] = path + "/" + locFilename;
+		files.put("sensorState", path + "/" + SENSOR_STATE_DUMP); 
+		files.put("location", path + "/" + locFilename);
+		files.put("sensorPosition", "data/" + SENSOR_POSITION_FILE);
+		files.put("wallsPosition", "data/" + WALLS_POSITION_FILE);
+
 		return files;
 	}
 	

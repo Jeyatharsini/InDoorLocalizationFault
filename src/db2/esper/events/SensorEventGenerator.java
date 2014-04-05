@@ -1,12 +1,16 @@
 package db2.esper.events;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.espertech.esper.client.EPRuntime;
 
+import db2.esper.common.SensorParsedData;
+import db2.esper.engine.EsperEngine;
 import db2.esper.event.models.DwcEvent;
 import db2.esper.event.models.PircEvent;
 import db2.esper.event.models.PirwEvent;
 import db2.esper.util.Parse;
-import db2.esper.util.SensorParsedData;
 
 public class SensorEventGenerator extends EventGenerator {
 	
@@ -25,9 +29,16 @@ public class SensorEventGenerator extends EventGenerator {
 	 * 
 	 */
 	
-	//TODO qui mi deve arrivare anche il path del file con posizioni dei sensori
-	public SensorEventGenerator(EPRuntime cepRT, String filePath) {
-		super(cepRT, filePath);
+	// questa Map mappa ciscun sensore tramite il suo deviceID alla sua posizione
+	protected Map<String, double[]> sensorPosition = new HashMap<String, double[]>();
+	
+	protected String sensorPositionFilePath = null;
+	
+	public SensorEventGenerator(EPRuntime cepRT, String sensorStateFilePath, String sensorPositionFilePath) {
+		super(cepRT, sensorStateFilePath);
+		
+		//carico la HashMap con le posizioni dei sensori, durante tutta la simulazione non cambieranno 
+		sensorPosition = Parse.sensorPositionFile(sensorPositionFilePath);
 	}
 	
 	/**
@@ -40,8 +51,9 @@ public class SensorEventGenerator extends EventGenerator {
 		//fa il matching della linea con l'espressione regolare e mi ritorna tutti i dati
 		SensorParsedData sensorParsedData = Parse.sensorStatusLine(line);
 		
-		//----> qui devi aggiungere le posizioni ai sensori Parse.qualcosa(sensorParseData, pathFile);
-		
+		//aggiunta, ai dati presenti nel file degli stati dei sensori, delle posizioni dei sensori
+		sensorParsedData = addSensorPosition(sensorParsedData);
+				
 		//a seconda del tipo di evento che ho parsando creo un oggetto evento diverso
 		if(sensorParsedData.getCategoryName().equalsIgnoreCase("PIRW")) {
 			PirwEvent pirwEvent = new PirwEvent(sensorParsedData);
@@ -68,5 +80,24 @@ public class SensorEventGenerator extends EventGenerator {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * This method is only to load (in the object obtained from the parse of the sensor state file)
+	 * the sensor position parsed from a specific file
+	 * @param sensorParsedData
+	 * @return 
+	 */
+	private SensorParsedData addSensorPosition(SensorParsedData sensorParsedData) {
+		// si suppone che tutti i nomi dei sensori siano mappati nella Map dichiarata nella classe EsperEngine
+		//TODO se vuoi generalizzarmi aggiungi un controllo
+		
+		double[] thisSensorPosition = sensorPosition.get( 
+				EsperEngine.sensorIdToName[ sensorParsedData.getDeviceID() ] );
+		
+		sensorParsedData.setX(thisSensorPosition[0]);
+		sensorParsedData.setY(thisSensorPosition[1]);
+		
+		return sensorParsedData;
 	}
 }

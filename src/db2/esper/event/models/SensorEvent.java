@@ -1,6 +1,6 @@
 package db2.esper.event.models;
 
-import db2.esper.util.SensorParsedData;
+import db2.esper.common.SensorParsedData;
 
 public abstract class SensorEvent {
 	
