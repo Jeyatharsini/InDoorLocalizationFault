@@ -1,9 +1,7 @@
 package db2.esper.engine;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.BasicConfigurator;
@@ -53,7 +51,8 @@ public class EsperEngine {
 		"Door 2.12"			// 7
 		};
 	
-	public static void main(String[] args) throws InterruptedException {
+	//TODO sistemare questi throws che qui non servono a molto...
+	public static void main(String[] args) throws InterruptedException, FileNotFoundException {
 		//inizializzazione di log4j richiesta da Esper, a noi non serve in realtˆ...
 		BasicConfigurator.configure(); 
 		
@@ -80,31 +79,32 @@ public class EsperEngine {
 		 */
 		
 		//Qualche query per testare che tutto funzioni...
-		query = "INSERT INTO pirwEPL SELECT * FROM PirwEvent ";
-		//query = "SELECT * FROM LocationEvent";
+		//query = "INSERT INTO pirwEPL SELECT * FROM PirwEvent ";
+		query = "SELECT * FROM DwcEvent";
 		EPStatement pirwEPL= cep.getEPAdministrator().createEPL(query);
 		//if(verbose) pirwEPL.addListener(myListener);
+		pirwEPL.addListener(myListener);
 
-		query = "INSERT INTO pircEPL SELECT * FROM PircEvent ";
-		EPStatement pircEPL = cep.getEPAdministrator().createEPL(query);
+//		query = "INSERT INTO pircEPL SELECT * FROM PircEvent ";
+//		EPStatement pircEPL = cep.getEPAdministrator().createEPL(query);
 		//if(verbose) pircEPL.addListener(myListener);
 
-		query = "INSERT into dwcEPL SELECT * FROM DwcEvent ";
-		EPStatement dwcEPL = cep.getEPAdministrator().createEPL(query);
+//		query = "INSERT into dwcEPL SELECT * FROM DwcEvent ";
+//		EPStatement dwcEPL = cep.getEPAdministrator().createEPL(query);
 		//if(verbose) dwcEPL.addListener(myListener);
 
-		query = "INSERT into locationEPL SELECT * FROM LocationEvent ";
-		EPStatement locationEPL = cep.getEPAdministrator().createEPL(query);
+//		query = "INSERT into locationEPL SELECT * FROM LocationEvent ";
+//		EPStatement locationEPL = cep.getEPAdministrator().createEPL(query);
 		//if(verbose) locationEPL.addListener(myListener);
 		
 		//query = "SELECT p.timestamp, p.deviceID "
 		//	  + "FROM pirwEPL.win:length(3) as p, LocationEvent.win:length(3) as l "
 		//	  + "WHERE p.timestamp = l.timestamp";
-		query = "SELECT * "
-			  + "FROM pirwEPL.win:time(30sec) "
-			  + "WHERE status IN (SELECT status FROM pircEPL.win:time(30sec))";
-		EPStatement onlyTrue = cep.getEPAdministrator().createEPL(query);
-		onlyTrue.addListener(myListener);	//aggiunta del Listener che riceve la notifica di un evento e la stampa!
+//		query = "SELECT * "
+//			  + "FROM pirwEPL.win:time(30sec) "
+//			  + "WHERE status IN (SELECT status FROM pircEPL.win:time(30sec))";
+//		EPStatement onlyTrue = cep.getEPAdministrator().createEPL(query);
+		//onlyTrue.addListener(myListener);	//aggiunta del Listener che riceve la notifica di un evento e la stampa!
 
 		//CARICAMENTO DEI FILE
 		HashMap<String, String> files = null;

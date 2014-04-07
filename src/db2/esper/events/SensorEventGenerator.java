@@ -1,5 +1,6 @@
 package db2.esper.events;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,32 +14,17 @@ import db2.esper.event.models.PirwEvent;
 import db2.esper.util.Parse;
 
 public class SensorEventGenerator extends EventGenerator {
-	
-	/*
-	 * TODO Cosa manca qui?
-	 * Una maniera efficace per gestire le posizioni dei sensori in base alla loro
-	 * deviceID, e il loro raggio in base al tipo di sensore.
-	 * 
-	 * Per il raggio un modo molto semplice visto che comunque è limitato, si può definire
-	 * nella classe del sensore e siamo a posto.
-	 * 
-	 * Per le posizioni, se sono date in un file di testo, si può fare il parsing del file
-	 * e creare una mappa con {ID sensore: posizioneX, posizioneY} da qui poi ogni volta
-	 * che si crea un nuovo tipo di evento, fare il match tra gli ID e assegnare le posizioni. 
-	 * 
-	 * 
-	 */
-	
+		
 	// questa Map mappa ciscun sensore tramite il suo deviceID alla sua posizione
-	protected Map<String, double[]> sensorPosition = new HashMap<String, double[]>();
+	protected Map<String, double[]> sensorsPosition = new HashMap<String, double[]>();
 	
 	protected String sensorPositionFilePath = null;
 	
-	public SensorEventGenerator(EPRuntime cepRT, String sensorStateFilePath, String sensorPositionFilePath) {
+	public SensorEventGenerator(EPRuntime cepRT, String sensorStateFilePath, String sensorPositionFilePath) throws FileNotFoundException {
 		super(cepRT, sensorStateFilePath);
 		
 		//carico la HashMap con le posizioni dei sensori, durante tutta la simulazione non cambieranno 
-		sensorPosition = Parse.sensorPositionFile(sensorPositionFilePath);
+		sensorsPosition = Parse.sensorPositionFile(sensorPositionFilePath);
 	}
 	
 	/**
@@ -53,7 +39,9 @@ public class SensorEventGenerator extends EventGenerator {
 		
 		//aggiunta, ai dati presenti nel file degli stati dei sensori, delle posizioni dei sensori
 		sensorParsedData = addSensorPosition(sensorParsedData);
-				
+		
+		if(verbose) System.out.println(sensorParsedData.toString());
+		
 		//a seconda del tipo di evento che ho parsando creo un oggetto evento diverso
 		if(sensorParsedData.getCategoryName().equalsIgnoreCase("PIRW")) {
 			PirwEvent pirwEvent = new PirwEvent(sensorParsedData);
@@ -90,9 +78,9 @@ public class SensorEventGenerator extends EventGenerator {
 	 */
 	private SensorParsedData addSensorPosition(SensorParsedData sensorParsedData) {
 		// si suppone che tutti i nomi dei sensori siano mappati nella Map dichiarata nella classe EsperEngine
-		//TODO se vuoi generalizzarmi aggiungi un controllo
+		//TODO se vuoi generalizzarmi aggiungi un controllo, ma per questi file non c'è bisogno.
 		
-		double[] thisSensorPosition = sensorPosition.get( 
+		double[] thisSensorPosition = sensorsPosition.get( 
 				EsperEngine.sensorIdToName[ sensorParsedData.getDeviceID() ] );
 		
 		sensorParsedData.setX(thisSensorPosition[0]);
