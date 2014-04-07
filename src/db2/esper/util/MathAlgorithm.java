@@ -1,5 +1,5 @@
 package db2.esper.util;
-
+import static java.lang.Math.*;
 /**
  * A collection of algorithm to do the math calculation behind the anomaly detection:
  * - intersection in space...
@@ -8,7 +8,21 @@ package db2.esper.util;
  */
 public class MathAlgorithm {
 
-	// E' giusto una bozza....qualcosa di pi pedante (spero per˜ non errata) non potevo farla...non ridere troppo! sistemi tu?
+	// Questo metodo, sfruttando il th di Pitagora, dovrebbe verificare che le due aree si intersechino o meno. Anche qui, se c'è da sistemare, fai pure ovviamente.
+	
+	public static boolean doIntersect (double xSs, double ySs, int radSs, double xLoc, double yLoc, int radLoc){
+		boolean intersect = true;
+		double dist = 0;
+		
+		//dist è la distanza tra il location point e la posizione del sensore
+		dist = sqrt( pow( abs(xLoc - xSs), 2) + pow( abs(yLoc - ySs), 2));
+
+		//radSs è il radius del sensore, mentre radLoc è quello del location point
+		if ( (dist - radSs - radLoc)>0 ){
+			intersect = false;
+		}
+		return intersect;
+	}
 		
 	public static boolean crossSegments (double[] A, double[] B, double[] C, double[] D){
 		double[] cross_scale = new double[2];
