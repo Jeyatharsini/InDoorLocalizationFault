@@ -4,7 +4,7 @@ import db2.esper.common.SensorParsedData;
 
 public class PircEvent extends SensorEvent {
 
-	private final int RADIUS = 5;
+	private final int RADIUS = 4;
 	
 	public PircEvent(SensorParsedData sensorParsedData) {
 		super(sensorParsedData);

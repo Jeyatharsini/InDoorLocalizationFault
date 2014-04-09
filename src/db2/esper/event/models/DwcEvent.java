@@ -4,7 +4,7 @@ import db2.esper.common.SensorParsedData;
 
 public class DwcEvent extends SensorEvent {
 
-	private final int RADIUS = 3;	// da capire se � da mettere o meno...
+	private final float RADIUS = 1.5f;	// da capire se � da mettere o meno...
 	
 	public DwcEvent(SensorParsedData sensorParsedData) {
 		super(sensorParsedData);

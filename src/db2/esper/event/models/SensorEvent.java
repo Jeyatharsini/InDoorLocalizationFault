@@ -7,7 +7,7 @@ public abstract class SensorEvent {
 	protected double x;
 	protected double y;
 	protected long timestamp;
-	protected int radius = 0;
+	protected float radius = 0;
 	protected int deviceID;
 	protected boolean status;
 	protected String categoryID = null;
@@ -34,7 +34,7 @@ public abstract class SensorEvent {
 		return timestamp;
 	}
 
-	public int getRadius() {
+	public float getRadius() {
 		return radius;
 	}
 	
