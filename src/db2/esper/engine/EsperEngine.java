@@ -1,6 +1,7 @@
 package db2.esper.engine;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
@@ -12,12 +13,14 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 
+import db2.esper.common.Wall;
 import db2.esper.event.models.DwcEvent;
 import db2.esper.event.models.LocationEvent;
 import db2.esper.event.models.PircEvent;
 import db2.esper.event.models.PirwEvent;
 import db2.esper.events.LocationEventGenerator;
 import db2.esper.events.SensorEventGenerator;
+import db2.esper.util.Parse;
 
 /* Rilevamenti:
  * A: senza fault
@@ -29,6 +32,7 @@ import db2.esper.events.SensorEventGenerator;
 
 public class EsperEngine {
 	
+	//DEBUG FLAG
 	public static final boolean VERBOSE = false;
 
 	// i nomi dei file che servono per far funzionare il tutto, meno il log delle LOC
@@ -50,6 +54,8 @@ public class EsperEngine {
 		"DOOR wc",			// 6
 		"Door 2.12"			// 7
 		};
+	
+	private static ArrayList<Wall> walls = null;
 	
 	//TODO sistemare questi throws che qui non servono a molto...
 	public static void main(String[] args) throws InterruptedException, FileNotFoundException {
@@ -113,6 +119,9 @@ public class EsperEngine {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+		
+		//CARICAMENTO MURI
+		walls = Parse.wallsPositionFile(files.get("wallsPosition"));
 		
 		//AVVIO DEI GENERATORI DI EVENTI
 		//siccome i due eventi location e sensor possono essere contemporanei genero due thread separati

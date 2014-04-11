@@ -150,13 +150,15 @@ public class Parse {
 		do {
 			line = scanner.nextLine();
 			match = pattern.matcher(line);
-			double[] coordinates = new double[2];
 			
 			walls.add(new Wall(new Double(match.group(1)), 
 					new Double(match.group(2)), 
 					new Double(match.group(3)), 
 					new Double(match.group(4)))
 			);
+			
+			if (verbose) System.out.println(walls);
+			
 		} while (scanner.hasNext());
 		
 		return walls;
