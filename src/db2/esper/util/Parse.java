@@ -2,6 +2,7 @@ package db2.esper.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -9,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import db2.esper.common.SensorParsedData;
+import db2.esper.common.Wall;
 import db2.esper.engine.EsperEngine;
 import db2.esper.event.models.LocationEvent;
 
@@ -93,7 +95,14 @@ public class Parse {
 		return locationEvent;
 		
 	}
-
+	
+	/**
+	 * Parser to load the sensor location coordinate directly from the given file
+	 * @param path, String, the location with the name of the text file containing the coordinate
+	 * @return Map object <String, double[]> the first is the description of the sensor, the second is
+	 * an object containing the coordinates X,Y
+	 * @throws FileNotFoundException, if the file is not found in the given path
+	 */
 	public static Map<String, double[]> sensorPositionFile(String path) throws FileNotFoundException {
 		boolean verbose = EsperEngine.VERBOSE;
 		Map<String, double[]> sensorsPosition = new HashMap<String, double[]>();
@@ -124,5 +133,33 @@ public class Parse {
 		} while(scanner.hasNext());
 		
 		return sensorsPosition;
+	}
+	
+	
+	public static ArrayList<Wall> wallsPositionFile(String path) throws FileNotFoundException {
+		boolean verbose = EsperEngine.VERBOSE;
+		ArrayList<Wall> walls = new ArrayList<Wall>();
+		String line = null;
+		//il file presenta numeri separati da spazi questo il perché del \s+
+		Pattern pattern = Pattern.compile(
+				"([0-9]+\\.[0-9]+)\\s+([0-9]+\\.[0-9]+)\\s+([0-9]+\\.[0-9]+)\\s+([0-9]+\\.[0-9]+)"
+				);
+		Scanner scanner = new Scanner(new File( path ));
+		Matcher match = null;
+		
+		do {
+			line = scanner.nextLine();
+			match = pattern.matcher(line);
+			double[] coordinates = new double[2];
+			
+			walls.add(new Wall(new Double(match.group(1)), 
+					new Double(match.group(2)), 
+					new Double(match.group(3)), 
+					new Double(match.group(4)))
+			);
+		} while (scanner.hasNext());
+		
+		return walls;
+		
 	}
 }
