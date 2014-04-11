@@ -1,23 +1,26 @@
 package db2.esper.event.models;
 
+import db2.esper.common.SensorParsedData;
+
 public abstract class SensorEvent {
 	
 	protected double x;
 	protected double y;
 	protected long timestamp;
-	protected int radius = 0;
+	protected float radius = 0;
 	protected int deviceID;
 	protected boolean status;
 	protected String categoryID = null;
 
-	public SensorEvent(long timestamp, int deviceID, boolean status, double x, double y) {
+	public SensorEvent(SensorParsedData sensorParsedData) {
 
-		this.x = x;
-		this.y = y;
-		this.timestamp = timestamp;
+		this.x = sensorParsedData.getX();
+		this.y = sensorParsedData.getY();
+		this.timestamp = sensorParsedData.getTimestamp();
 
-		this.deviceID = deviceID;
-		this.status = status;
+		this.deviceID = sensorParsedData.getDeviceID();
+		this.status = sensorParsedData.isStatus();
+		
 	}
 	
 	public double getX() {
@@ -31,7 +34,7 @@ public abstract class SensorEvent {
 		return timestamp;
 	}
 
-	public int getRadius() {
+	public float getRadius() {
 		return radius;
 	}
 	
