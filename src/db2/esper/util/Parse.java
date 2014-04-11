@@ -151,11 +151,13 @@ public class Parse {
 			line = scanner.nextLine();
 			match = pattern.matcher(line);
 			
-			walls.add(new Wall(new Double(match.group(1)), 
-					new Double(match.group(2)), 
-					new Double(match.group(3)), 
-					new Double(match.group(4)))
-			);
+			if (match.find()) {
+				walls.add(new Wall(new Double(match.group(1)), 
+						new Double(match.group(2)), 
+						new Double(match.group(3)), 
+						new Double(match.group(4)))
+				);
+			}
 			
 			if (verbose) System.out.println(walls);
 			
