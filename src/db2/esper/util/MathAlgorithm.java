@@ -1,5 +1,9 @@
 package db2.esper.util;
 import static java.lang.Math.*;
+
+import java.util.ArrayList;
+
+import db2.esper.common.Wall;
 /**
  * A collection of algorithm to do the math calculation behind the anomaly detection:
  * - intersection in space...
@@ -9,7 +13,6 @@ import static java.lang.Math.*;
 public class MathAlgorithm {
 
 	// Questo metodo, sfruttando il th di Pitagora, dovrebbe verificare che le due aree si intersechino o meno. Anche qui, se c'è da sistemare, fai pure ovviamente.
-	
 	public static boolean doIntersect (double xSs, double ySs, int radSs, double xLoc, double yLoc, int radLoc){
 		boolean intersect = true;
 		double dist = 0;
@@ -24,6 +27,25 @@ public class MathAlgorithm {
 		return intersect;
 	}
 		
+	//questo metodo ritorna true se vi è almeno un muro tra il sensore e il localizzatore
+	public static boolean existsWall (ArrayList<Wall> walls, double xSs, double ySs, double xLoc, double yLoc){
+		double[] StartW;
+		double[] EndW;
+		double[] Ss = new double[]{xSs, ySs};
+		double[] Loc = new double[]{xLoc, yLoc};
+		boolean exists = false;
+				
+		for (Wall i : walls){
+			StartW = new double[]{i.getStartX(), i.getStartY()};	
+			EndW = new double[]{i.getEndX(), i.getEndY()};
+			if (crossSegments(Ss, Loc, StartW, EndW)){
+			exists = true;
+			}
+		}
+		return exists;
+	}
+	
+	//questo metodo verifica se due segmenti, AB e CD, si intersecano oppure no
 	public static boolean crossSegments (double[] A, double[] B, double[] C, double[] D){
 		double[] cross_scale = new double[2];
 		double[] vettCA= new double[2];
@@ -49,7 +71,7 @@ public class MathAlgorithm {
 		
 		//bol= all(cross_scale>=0 & cross_scale<=1):
 		for (int i=0 ; i<cross_scale.length ; i++)
-			if (cross_scale[i]<0 || cross_scale[1]>1){
+			if (cross_scale[i]<0 || cross_scale[i]>1){
 				result=false;
 			}
 		return result;
