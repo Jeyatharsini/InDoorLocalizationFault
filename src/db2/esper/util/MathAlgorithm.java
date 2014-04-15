@@ -4,6 +4,7 @@ import static java.lang.Math.*;
 import java.util.ArrayList;
 
 import db2.esper.common.Wall;
+import db2.esper.engine.EsperEngine;
 /**
  * A collection of algorithm to do the math calculation behind the anomaly detection:
  * - intersection in space...
@@ -28,14 +29,16 @@ public class MathAlgorithm {
 	}
 		
 	//questo metodo ritorna true se vi è almeno un muro tra il sensore e il localizzatore
-	public static boolean existsWall (ArrayList<Wall> walls, double xSs, double ySs, double xLoc, double yLoc){
+//	public static boolean existsWall (ArrayList<Wall> walls, double xSs, double ySs, double xLoc, double yLoc){
+	public static boolean existsWall (double xSs, double ySs, double xLoc, double yLoc){
+
 		double[] StartW;
 		double[] EndW;
 		double[] Ss = new double[]{xSs, ySs};
 		double[] Loc = new double[]{xLoc, yLoc};
 		boolean exists = false;
-				
-		for (Wall i : walls){
+		
+		for (Wall i : EsperEngine.walls){
 			StartW = new double[]{i.getStartX(), i.getStartY()};	
 			EndW = new double[]{i.getEndX(), i.getEndY()};
 			if (crossSegments(Ss, Loc, StartW, EndW)){

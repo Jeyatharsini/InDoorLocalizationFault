@@ -18,9 +18,11 @@ import db2.esper.event.models.DwcEvent;
 import db2.esper.event.models.LocationEvent;
 import db2.esper.event.models.PircEvent;
 import db2.esper.event.models.PirwEvent;
+import db2.esper.event.models.SensorEvent;
 import db2.esper.events.LocationEventGenerator;
 import db2.esper.events.SensorEventGenerator;
 import db2.esper.util.Parse;
+import db2.esper.util.MathAlgorithm;
 
 /* Rilevamenti:
  * A: senza fault
@@ -55,7 +57,7 @@ public class EsperEngine {
 		"Door 2.12"			// 7
 		};
 	
-	private static ArrayList<Wall> walls = null;
+	public static ArrayList<Wall> walls = null;
 	
 	//TODO sistemare questi throws che qui non servono a molto...
 	public static void main(String[] args) throws InterruptedException, FileNotFoundException {
@@ -86,10 +88,12 @@ public class EsperEngine {
 		
 		//Qualche query per testare che tutto funzioni...
 		//query = "INSERT INTO pirwEPL SELECT * FROM PirwEvent ";
-		query = "SELECT * FROM DwcEvent";
-		EPStatement pirwEPL= cep.getEPAdministrator().createEPL(query);
-		//if(verbose) pirwEPL.addListener(myListener);
-		pirwEPL.addListener(myListener);
+//		query = "  SELECT * "
+//				+ "FROM SensorEvent.win:time(20) as S, LocationEvent.win:time(10) as L"
+//				+ "WHERE MathAlgorithm.existWalls(";
+//		EPStatement pirwEPL= cep.getEPAdministrator().createEPL(query);
+//		//if(verbose) pirwEPL.addListener(myListener);
+//		pirwEPL.addListener(myListener);
 
 //		query = "INSERT INTO pircEPL SELECT * FROM PircEvent ";
 //		EPStatement pircEPL = cep.getEPAdministrator().createEPL(query);
@@ -133,6 +137,14 @@ public class EsperEngine {
 		
 		sensorEventGenerator.start();
 		locationEventGenerator.start();
+		
+		//QUERY
+		query = "  SELECT * "
+				+ "FROM SensorEvent.win:time(20) as S, LocationEvent.win:time(10) as L "
+				+ "WHERE db2.esper.util.MathAlgorithm.existsWall(S.x, S.y, L.x, L.y) = true";
+		EPStatement pirwEPL= cep.getEPAdministrator().createEPL(query);
+		//if(verbose) pirwEPL.addListener(myListener);
+		pirwEPL.addListener(myListener);
 	}
 	
 	/**
@@ -145,6 +157,7 @@ public class EsperEngine {
 		cepConfig.addEventType("PirwEvent", PirwEvent.class.getName());
 		cepConfig.addEventType("PircEvent", PircEvent.class.getName());
 		cepConfig.addEventType("DwcEvent", DwcEvent.class.getName());
+		cepConfig.addEventType("SensorEvent", SensorEvent.class.getName());
 		cepConfig.addEventType("LocationEvent", LocationEvent.class.getName());
 		
 		return cepConfig;
