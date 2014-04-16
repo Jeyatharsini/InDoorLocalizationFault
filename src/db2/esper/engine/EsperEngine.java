@@ -126,7 +126,7 @@ public class EsperEngine {
 		
 		//CARICAMENTO MURI
 		walls = Parse.wallsPositionFile(files.get("wallsPosition"));
-		
+
 		//AVVIO DEI GENERATORI DI EVENTI
 		//siccome i due eventi location e sensor possono essere contemporanei genero due thread separati
 		SensorEventGenerator sensorEventGenerator = new SensorEventGenerator(cepRT,files.get("sensorState"), files.get("sensorPosition"));
@@ -216,4 +216,5 @@ public class EsperEngine {
 		else
 			throw new FileNotFoundException("LOC file mancante!");
 	}
+	
 }

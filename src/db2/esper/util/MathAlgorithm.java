@@ -67,10 +67,10 @@ public class MathAlgorithm {
 			vettAC[i]= A[i]-C[i];
 		
 		//cross_scale(1)=cprod((c(1:2)-a(1:2)),d(1:2)-c(1:2)) / cprod(b(1:2)-a(1:2),d(1:2)-c(1:2)):
-		cross_scale[1] = cprod(vettCA , vettDC) / cprod (vettBA , vettDC);
+		cross_scale[0] = cprod(vettCA , vettDC) / cprod (vettBA , vettDC);
 		
 		//cross_scale(2)=cprod((a(1:2)-c(1:2)),b(1:2)-a(1:2)) /  cprod(d(1:2)-c(1:2),b(1:2)-a(1:2));
-		cross_scale[2] = cprod(vettAC , vettBA) / cprod (vettDC , vettBA);
+		cross_scale[1] = cprod(vettAC , vettBA) / cprod (vettDC , vettBA);
 		
 		//bol= all(cross_scale>=0 & cross_scale<=1):
 		for (int i=0 ; i<cross_scale.length ; i++)
