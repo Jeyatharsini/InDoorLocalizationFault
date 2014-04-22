@@ -22,7 +22,6 @@ import db2.esper.event.models.SensorEvent;
 import db2.esper.events.LocationEventGenerator;
 import db2.esper.events.SensorEventGenerator;
 import db2.esper.util.Parse;
-import db2.esper.util.MathAlgorithm;
 
 /* Rilevamenti:
  * A: senza fault
@@ -88,12 +87,11 @@ public class EsperEngine {
 		
 		//Qualche query per testare che tutto funzioni...
 		//query = "INSERT INTO pirwEPL SELECT * FROM PirwEvent ";
-//		query = "  SELECT * "
-//				+ "FROM SensorEvent.win:time(20) as S, LocationEvent.win:time(10) as L"
-//				+ "WHERE MathAlgorithm.existWalls(";
-//		EPStatement pirwEPL= cep.getEPAdministrator().createEPL(query);
-//		//if(verbose) pirwEPL.addListener(myListener);
-//		pirwEPL.addListener(myListener);
+		query = "  SELECT * "
+				+ "FROM PircEvent";
+		EPStatement pirwEPL= cep.getEPAdministrator().createEPL(query);
+		//if(verbose) pirwEPL.addListener(myListener);
+		pirwEPL.addListener(myListener);
 
 //		query = "INSERT INTO pircEPL SELECT * FROM PircEvent ";
 //		EPStatement pircEPL = cep.getEPAdministrator().createEPL(query);
@@ -139,12 +137,12 @@ public class EsperEngine {
 		locationEventGenerator.start();
 		
 		//QUERY
-		query = "  SELECT * "
-				+ "FROM SensorEvent.win:time(20) as S, LocationEvent.win:time(10) as L "
-				+ "WHERE db2.esper.util.MathAlgorithm.existsWall(S.x, S.y, L.x, L.y) = true";
-		EPStatement pirwEPL= cep.getEPAdministrator().createEPL(query);
-		//if(verbose) pirwEPL.addListener(myListener);
-		pirwEPL.addListener(myListener);
+//		query = "  SELECT * "
+//				+ "FROM SensorEvent.win:time(20) as S, LocationEvent.win:time(10) as L "
+//				+ "WHERE db2.esper.util.MathAlgorithm.existsWall(S.x, S.y, L.x, L.y) = true";
+//		EPStatement pirwEPL= cep.getEPAdministrator().createEPL(query);
+//		//if(verbose) pirwEPL.addListener(myListener);
+//		pirwEPL.addListener(myListener);
 	}
 	
 	/**
