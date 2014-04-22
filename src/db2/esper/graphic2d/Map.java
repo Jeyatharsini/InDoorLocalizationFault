@@ -12,11 +12,13 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 
 import db2.esper.common.Wall;
+import db2.esper.engine.EsperEngine;
 
 @SuppressWarnings("serial")
 public class Map extends JPanel {
 	private double conversionFactor;
-	Graphics2D graphics2d;
+	private Graphics2D graphics2d;
+	private static boolean verbose = EsperEngine.VERBOSE;
 
 	public Map(int width, int height) {
 		//setBackground(Color.BLUE);
@@ -29,9 +31,13 @@ public class Map extends JPanel {
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-        //doDrawing(g);
 	}
 	
+	/**
+	 * Draws the walls loaded passed as argument
+	 * @param walls, ArrayList<Wall>, this is the array with the starting and ending coordinates
+	 * of the walls
+	 */
 	public void drawWalls(ArrayList<Wall> walls) {
 		
 		if (graphics2d == null)
@@ -64,8 +70,10 @@ public class Map extends JPanel {
 			}
 		}
 		
-		System.out.println("MAX X: " + maxX); 
-		System.out.println("MAX Y: " + maxY);
+		if ( verbose ) { //DEBUG
+			System.out.println("MAX X: " + maxX); 
+			System.out.println("MAX Y: " + maxY);
+		}
 		
 		conversionFactor = (maxX > maxY)? width / maxX : height / maxY ;
 		
@@ -75,12 +83,20 @@ public class Map extends JPanel {
 			int y1 = (int) (wall.getStartY() * conversionFactor);
 			int x2 = (int) (wall.getEndX() * conversionFactor);
 			int y2 = (int) (wall.getEndY() * conversionFactor);			
-			System.out.println("COORDINATES: " + x1 + ", " + y1 + ", " + x2 + ", " + y2 + ", ");		
+			
+			if (verbose) //DEBUG 
+				System.out.println("COORDINATES: " + x1 + ", " + y1 + ", " + x2 + ", " + y2 + ", ");		
 
 			graphics2d.drawLine(x1, y1, x2, y2);	
 		}
 	}
-
+	
+	/**
+	 * Draws a red Circle in the given position with the given range
+	 * @param x, double, X coordinate
+	 * @param y, double, Y coordinate
+	 * @param radius, double, circle range
+	 */
 	public void drawInPosition(double x, double y, double radius) {
 		if (graphics2d == null)
 			graphics2d = (Graphics2D) getGraphics();
@@ -97,10 +113,5 @@ public class Map extends JPanel {
 		graphics2d.draw(shape);
 	}
 
-	public void drawInPosition(double x, double y, float radius) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 
 }

@@ -3,7 +3,6 @@ package db2.esper.engine;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.UpdateListener;
 
-import db2.esper.event.models.SensorEvent;
 import db2.esper.graphic2d.Map;
 
 public class Listener implements UpdateListener {
@@ -15,7 +14,6 @@ public class Listener implements UpdateListener {
 
 	@Override
 	public void update(EventBean[] arg0, EventBean[] arg1) {
-		SensorEvent event = null;
 		for (EventBean e : arg0) {
 			System.out.println("Event received:" + e.getUnderlying());
 			map.drawInPosition(
