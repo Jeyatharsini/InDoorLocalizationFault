@@ -42,7 +42,7 @@ public class EsperEngine {
 	private static final String SENSOR_POSITION_FILE = "zwave_pos.txt";
 	private static final String WALLS_POSITION_FILE = "walls.txt";
 	
-	/* dato che avevamo preparato il codice per usare i deviceID, ma nel file c' il deviceName
+	/* dato che avevamo preparato il codice per usare i deviceID, ma nel file c'ï¿½ il deviceName
 	 * per non riscrivere l'espressione regolare abbiamo fatto questa Map
 	 * che fa corrispondere a ciascun deviceName il suo deviceID
 	 */
@@ -61,10 +61,10 @@ public class EsperEngine {
 	
 	//TODO sistemare questi throws che qui non servono a molto...
 	public static void main(String[] args) throws InterruptedException, FileNotFoundException {
-		//inizializzazione di log4j richiesta da Esper, a noi non serve in realtˆ...
+		//inizializzazione di log4j richiesta da Esper, a noi non serve in realtï¿½...
 		BasicConfigurator.configure(); 
 		
-		//se in args non  stata passato nessun percorso valido, carica i file di default
+		//se in args non ï¿½ stata passato nessun percorso valido, carica i file di default
 		String path = null;
 		if(args.length == 0) {
 			path = "data/A"; //cambiami per caricare gli altri test case
@@ -81,7 +81,7 @@ public class EsperEngine {
 		/*
 		 * PROBLEMA: 
 		 * Se prendo una query che recupera solo gli eventi di un certo tipo, e ci attacco il listener
-		 * a consolle viene stampato un solo evento per tipo come  giusto che sia.
+		 * a consolle viene stampato un solo evento per tipo come ï¿½ giusto che sia.
 		 * Se attivo tutte e 4 le query contemporaneamente e ad ogni query attacco lo stesso listener ottengo
 		 * un sacco di eventi duplicati.
 		 */
@@ -94,18 +94,29 @@ public class EsperEngine {
 //		EPStatement pirwEPL= cep.getEPAdministrator().createEPL(query);
 //		//if(verbose) pirwEPL.addListener(myListener);
 //		pirwEPL.addListener(myListener);
-
-//		query = "INSERT INTO pircEPL SELECT * FROM PircEvent ";
-//		EPStatement pircEPL = cep.getEPAdministrator().createEPL(query);
+/*
+		query = "INSERT INTO streamPIRC SELECT * FROM PircEvent(status=true) ";
+		EPStatement pircEPL = cep.getEPAdministrator().createEPL(query);
 		//if(verbose) pircEPL.addListener(myListener);
+		pircEPL.addListener(myListener);
+*/		
 
 //		query = "INSERT into dwcEPL SELECT * FROM DwcEvent ";
 //		EPStatement dwcEPL = cep.getEPAdministrator().createEPL(query);
 		//if(verbose) dwcEPL.addListener(myListener);
-
-//		query = "INSERT into locationEPL SELECT * FROM LocationEvent ";
-//		EPStatement locationEPL = cep.getEPAdministrator().createEPL(query);
+/*
+		query = "INSERT into streamLOC SELECT * FROM LocationEvent ";
+		EPStatement locationEPL = cep.getEPAdministrator().createEPL(query);
 		//if(verbose) locationEPL.addListener(myListener);
+		locationEPL.addListener(myListener);		
+*/		
+		/*prova
+		query = "SELECT PIRC.deviceID, PIRC.timestamp "
+				+ "FROM pattern[every(PIRC=streamPIRC(status=true))->NOT(LOC=streamLOC WHERE timer:within(10 sec))]";
+				
+		EPStatement test = cep.getEPAdministrator().createEPL(query);
+		test.addListener(myListener);
+		*/
 		
 		//query = "SELECT p.timestamp, p.deviceID "
 		//	  + "FROM pirwEPL.win:length(3) as p, LocationEvent.win:length(3) as l "
@@ -138,13 +149,50 @@ public class EsperEngine {
 		sensorEventGenerator.start();
 		locationEventGenerator.start();
 		
-		//QUERY
+		/*by enzo1: non Ã¨ precisissima ma non trova fault
+		query = "SELECT PIRC.deviceID, PIRC.timestamp, LOC.timestamp "
+				+ "FROM PircEvent(status=true).std:unique(sensorID).win:time(5 sec) as PIRC, LocationEvent.std:unique(timestamp).win:time(5 sec) as LOC "
+				+ "WHERE db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, 4, LOC.x, LOC.y, 4) = false "
+				+ "OR db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, LOC.x, LOC.y) = true ";
+		*/
+		
+		/*by enzo2: rispetto alla precedente restringe il campo visivo ancora di piÃ¹, ma non Ã¨
+		  ai livelli che si otterrebbero usando il "from pattern" secondo me
+		query = "SELECT PIRC.deviceID, PIRC.timestamp, LOC.timestamp "
+				+ "FROM PircEvent(status=true).std:unique(sensorID).win:time(5 sec) as PIRC, LocationEvent.std:unique(timestamp).win:time(5 sec) as LOC "
+				+ "WHERE (PIRC.timestamp BETWEEN LOC.timestamp AND LOC.timestamp + 5000) "
+				+ "AND (db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, 4, LOC.x, LOC.y, 4) = false "
+				+ "OR db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, LOC.x, LOC.y) = true) ";
+		*/
+		/*by enzo3: forse migliore
+		 query = "SELECT 'FAULT', PIRC.deviceID, PIRC.timestamp "
+				 + "FROM PircEvent(status=true).std:unique(sensorID).std:lastevent() AS PIRC, LocationEvent.std:unique(timestamp).win:length(10) AS LOC "
+				 + "WHERE db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, 4, LOC.x, LOC.y, 4) = false "
+				 + "OR (db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, 4, LOC.x, LOC.y, 4) = true "
+				 + "AND db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, LOC.x, LOC.y) = true)";
+				 //+ "OUTPUT first every 5 seconds";
+		*/
+		/*by enzo4: Ã¨ un test, non Ã¨ errata sintatticamente ma non funziona come dovrebbe
+		query= "SELECT PIRC.deviceID, PIRC.timestamp, 'FAULT' "
+				+ "FROM pattern[(every PIRC=PircEvent(status=true)->every (LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, 4, LOC.x, LOC.y, 4)) "
+				+ "WHERE timer:within(2 sec) AND NOT PircEvent(status=true)))].win:time(2 sec) "
+				+ "WHERE db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, LOC.x, LOC.y) = true";
+		*/
+		query= "SELECT PIRW.deviceID, PIRW.timestamp, 'FAULT' "
+				+ "FROM pattern[(every PIRW=PirwEvent(status=true)->every (LOC=LocationEvent AND NOT PirwEvent(status=true)))] "
+				+ "WHERE NOT EXISTS (SELECT LOC.timestamp "
+				+ "FROM LOC WHERE db2.esper.util.MathAlgorithm.doIntersect(PIRW.x, PIRW.y, 4, LOC.x, LOC.y, 4)= true )";
+		EPStatement pirwEPL= cep.getEPAdministrator().createEPL(query);
+		pirwEPL.addListener(myListener);
+			
+		/*by mark
 		query = "  SELECT * "
 				+ "FROM SensorEvent.win:time(20) as S, LocationEvent.win:time(10) as L "
 				+ "WHERE db2.esper.util.MathAlgorithm.existsWall(S.x, S.y, L.x, L.y) = true";
 		EPStatement pirwEPL= cep.getEPAdministrator().createEPL(query);
 		//if(verbose) pirwEPL.addListener(myListener);
 		pirwEPL.addListener(myListener);
+		*/
 	}
 	
 	/**
