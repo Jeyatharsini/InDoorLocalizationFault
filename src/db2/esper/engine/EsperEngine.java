@@ -63,10 +63,12 @@ public class EsperEngine {
 	
 	//TODO sistemare questi throws che qui non servono a molto...
 	public static void main(String[] args) throws InterruptedException, FileNotFoundException {
+		JFrame mainWindow; 
+		
 		//inizializzazione di log4j richiesta da Esper, a noi non serve in realtà...
 		BasicConfigurator.configure(); 
 		
-		createAndShowGUI();
+		mainWindow = createAndShowGUI();
 		
 		//se in args non è stata passato nessun percorso valido, carica i file di default
 		String path = null;
@@ -129,7 +131,11 @@ public class EsperEngine {
 		
 		//CARICAMENTO MURI
 		walls = Parse.wallsPositionFile(files.get("wallsPosition"));
-
+		
+		//DRAW WALLS ON MAP
+		Map map = (Map) mainWindow.getContentPane().getComponent(0);
+		map.drawWalls(walls);
+		
 		//AVVIO DEI GENERATORI DI EVENTI
 		//siccome i due eventi location e sensor possono essere contemporanei genero due thread separati
 		SensorEventGenerator sensorEventGenerator = new SensorEventGenerator(cepRT,files.get("sensorState"), files.get("sensorPosition"));
@@ -222,20 +228,23 @@ public class EsperEngine {
 
 	/**
 	 * Initialize and create the window that is needed to show the map
+	 * @return 
 	 */
-	private static void createAndShowGUI() {
-		int width = 400;
-		int height = 400;
+	private static JFrame createAndShowGUI() {
+		int width = 600;
+		int height = 600;
 		JFrame window = new JFrame("Esper In Door Localization Simulator");
        
 		//setup the window dimension
 		window.setSize(width, height);
 
 		//add the map panel
-		window.getContentPane().add(new Map(width, height));
+		window.getContentPane().add(new Map(width, height), 0);
 
 		//display the window
-		window.setVisible(true);    
+		window.setVisible(true);
+		
+		return window;
 	}
 
 }

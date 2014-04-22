@@ -1,8 +1,7 @@
 package db2.esper.util;
-import static java.lang.Math.*;
-
-import java.util.ArrayList;
-
+import static java.lang.Math.abs;
+import static java.lang.Math.pow;
+import static java.lang.Math.sqrt;
 import db2.esper.common.Wall;
 import db2.esper.engine.EsperEngine;
 /**

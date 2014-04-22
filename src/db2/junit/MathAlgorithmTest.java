@@ -1,6 +1,7 @@
 package db2.junit;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -8,7 +9,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import db2.esper.engine.EsperEngine;
 import db2.esper.util.MathAlgorithm;
 
 public class MathAlgorithmTest {
