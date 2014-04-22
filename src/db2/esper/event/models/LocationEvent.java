@@ -5,7 +5,7 @@ public class LocationEvent {
 	protected double x;
 	protected double y;
 	protected long timestamp;
-	protected int radius = 0;
+	protected int radius = 1;
 	
 	public LocationEvent(double positionX, double positionY, long timestamp) {
 		this.x = positionX;
