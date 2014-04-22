@@ -69,7 +69,8 @@ public class EsperEngine {
 		BasicConfigurator.configure(); 
 		
 		mainWindow = createAndShowGUI();
-		
+		Map map = (Map) mainWindow.getContentPane().getComponent(0);
+
 		//se in args non è stata passato nessun percorso valido, carica i file di default
 		String path = null;
 		if(args.length == 0) {
@@ -81,7 +82,7 @@ public class EsperEngine {
 		EPServiceProvider cep = EPServiceProviderManager.getProvider("myCEP", getConfiguration());
 		EPRuntime cepRT = cep.getEPRuntime();
 		
-		Listener myListener = new Listener();
+		Listener myListener = new Listener(map);
 		String query = null;
 		
 		/*
@@ -95,7 +96,8 @@ public class EsperEngine {
 		//Qualche query per testare che tutto funzioni...
 		//query = "INSERT INTO pirwEPL SELECT * FROM PirwEvent ";
 		query = "  SELECT * "
-				+ "FROM PircEvent";
+				+ "FROM DwcEvent as D "
+				+ "WHERE D.deviceID = 7";
 		EPStatement pirwEPL= cep.getEPAdministrator().createEPL(query);
 		//if(verbose) pirwEPL.addListener(myListener);
 		pirwEPL.addListener(myListener);
@@ -133,7 +135,6 @@ public class EsperEngine {
 		walls = Parse.wallsPositionFile(files.get("wallsPosition"));
 		
 		//DRAW WALLS ON MAP
-		Map map = (Map) mainWindow.getContentPane().getComponent(0);
 		map.drawWalls(walls);
 		
 		//AVVIO DEI GENERATORI DI EVENTI
@@ -231,13 +232,16 @@ public class EsperEngine {
 	 * @return 
 	 */
 	private static JFrame createAndShowGUI() {
-		int width = 600;
+		int width = 800;
 		int height = 600;
 		JFrame window = new JFrame("Esper In Door Localization Simulator");
        
 		//setup the window dimension
 		window.setSize(width, height);
-
+		
+		//avoid resize (it's not managed, if you want a bigger window change the dimension over here)
+		window.setResizable(false);
+		
 		//add the map panel
 		window.getContentPane().add(new Map(width, height), 0);
 

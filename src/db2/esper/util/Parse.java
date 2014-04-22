@@ -25,10 +25,11 @@ public class Parse {
 	public static SensorParsedData sensorStatusLine(String line) {
 		
 		boolean verbose = EsperEngine.VERBOSE;
+		//verbose = true;
 		SensorParsedData sensorParsedData = new SensorParsedData();
 		
 		Pattern pattern = Pattern.compile(
-				"(TimeStamp|DeviceID|CategoryName|ZoneName|Status)=(([\\.0-9]+)|(PIRC|PIRW|DOOR|true|false))"
+				"(TimeStamp|DeviceID|CategoryName|Status)=(([\\.0-9]+)|(PIRC|PIRW|DOOR|true|false))"
 				);
 
 		Matcher matcher = pattern.matcher(line);
@@ -44,19 +45,19 @@ public class Parse {
 		while (matcher.find() && i <= 4) {
 			
 			if (i == 0) {
-				if(verbose) System.out.println(matcher.group(2));
+				if(verbose) System.out.println(matcher.group(1) + ": " + matcher.group(2));
 				//ho bisogno di avere tutti i tempi in millisecondi, quindi devo fare questo passaggio
 				Double tempTimestamp = Double.valueOf(matcher.group(2)); 
 				tempTimestamp = tempTimestamp * 1000;
 				sensorParsedData.setTimestamp(tempTimestamp.longValue());
 			} else if (i == 1) {
-				if(verbose) System.out.println(matcher.group(2));
+				if(verbose) System.out.println(matcher.group(1) + ": " + matcher.group(2));
 				sensorParsedData.setDeviceID(Integer.valueOf(matcher.group(2)).intValue());
 			} else if (i == 2) {
-				if(verbose) System.out.println(matcher.group(2));
+				if(verbose) System.out.println(matcher.group(1) + ": " + matcher.group(2));
 				sensorParsedData.setCategoryName(String.valueOf(matcher.group(2)));
 			} else if (i == 3) {
-				if(verbose) System.out.println(matcher.group(2));
+				if(verbose) System.out.println(matcher.group(1) + ": " + matcher.group(2));
 				sensorParsedData.setStatus(Boolean.valueOf(matcher.group(2)).booleanValue());
 			}
 			

@@ -5,8 +5,9 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
-import java.util.Random;
 
 import javax.swing.JPanel;
 
@@ -14,10 +15,15 @@ import db2.esper.common.Wall;
 
 @SuppressWarnings("serial")
 public class Map extends JPanel {
-	
+	private double conversionFactor;
+	Graphics2D graphics2d;
+
 	public Map(int width, int height) {
 		//setBackground(Color.BLUE);
 		setSize(width, height);
+		graphics2d = (Graphics2D) getGraphics();
+		conversionFactor = 0;
+
 	}
 	
 	@Override
@@ -27,7 +33,9 @@ public class Map extends JPanel {
 	}
 	
 	public void drawWalls(ArrayList<Wall> walls) {
-		Graphics2D graphics2d = (Graphics2D) getGraphics();
+		
+		if (graphics2d == null)
+			graphics2d = (Graphics2D) getGraphics();
 		
 		graphics2d.setColor(Color.black);
 		
@@ -59,22 +67,38 @@ public class Map extends JPanel {
 		System.out.println("MAX X: " + maxX); 
 		System.out.println("MAX Y: " + maxY);
 		
-		double XConversion = width / maxX;
-		double YConversion = height / maxY;
+		conversionFactor = (maxX > maxY)? width / maxX : height / maxY ;
 		
 		// normalizzo i valori e passo tutto in pixel
 		for (Wall wall : walls) {
-			int x1 = (int) (wall.getStartX() * XConversion);
-			int y1 = (int) (wall.getStartY() * YConversion);
-			int x2 = (int) (wall.getEndX() * XConversion);
-			int y2 = (int) (wall.getEndY() * YConversion);
-			
+			int x1 = (int) (wall.getStartX() * conversionFactor);
+			int y1 = (int) (wall.getStartY() * conversionFactor);
+			int x2 = (int) (wall.getEndX() * conversionFactor);
+			int y2 = (int) (wall.getEndY() * conversionFactor);			
 			System.out.println("COORDINATES: " + x1 + ", " + y1 + ", " + x2 + ", " + y2 + ", ");		
 
-			graphics2d.drawLine(x1, y1, x2, y2);
-			
+			graphics2d.drawLine(x1, y1, x2, y2);	
 		}
+	}
+
+	public void drawInPosition(double x, double y, double radius) {
+		if (graphics2d == null)
+			graphics2d = (Graphics2D) getGraphics();
 		
+		graphics2d.setColor(Color.RED);
+		
+		Shape shape = new Ellipse2D.Double(
+				(x-radius)*conversionFactor, 
+				(y-radius)*conversionFactor, 
+				(2.0*radius)*conversionFactor, 
+				(2.0*radius)*conversionFactor
+				);
+		
+		graphics2d.draw(shape);
+	}
+
+	public void drawInPosition(double x, double y, float radius) {
+		// TODO Auto-generated method stub
 		
 	}
 	
