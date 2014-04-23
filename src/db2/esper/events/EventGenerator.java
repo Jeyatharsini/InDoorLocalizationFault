@@ -36,12 +36,17 @@ public abstract class EventGenerator extends Thread {
 	}
 	
 	@Override
-	public void run() {	
+	public void run() {
+		System.out.println("EventGenerator: " + getClass() + " -> STARTED");
+
 		while (this.scanner.hasNext()) {
 			generateEvent(this.scanner.nextLine());
 		}		
 		
 		this.scanner.close();
+		
+		System.out.println("EventGenerator: " + getClass() + " -> END OF DATA");
+
 		//TODO in qualche modo questo thread va fermato quando ho finito gli eventi...
 	}
 	

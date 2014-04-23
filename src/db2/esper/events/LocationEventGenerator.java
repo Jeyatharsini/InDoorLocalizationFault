@@ -9,10 +9,13 @@ public class LocationEventGenerator extends EventGenerator {
 
 	public LocationEventGenerator(EPRuntime cepRT, String filePath) {
 		super(cepRT, filePath);
+		System.out.println("LocationEventGenerator STARTED");
+
 	}
 	
 	@Override
 	protected void generateEvent(String line) {
+		
 		LocationEvent locationEvent = Parse.locationLine(line);
 		
 		if (locationEvent != null) {

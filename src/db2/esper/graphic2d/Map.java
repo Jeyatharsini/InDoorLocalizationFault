@@ -97,11 +97,11 @@ public class Map extends JPanel {
 	 * @param y, double, Y coordinate
 	 * @param radius, double, circle range
 	 */
-	public void drawInPosition(double x, double y, double radius) {
+	public void drawInPosition(double x, double y, double radius, Color color) {
 		if (graphics2d == null)
 			graphics2d = (Graphics2D) getGraphics();
 		
-		graphics2d.setColor(Color.RED);
+		graphics2d.setColor(color);
 		
 		Shape shape = new Ellipse2D.Double(
 				(x-radius)*conversionFactor, 

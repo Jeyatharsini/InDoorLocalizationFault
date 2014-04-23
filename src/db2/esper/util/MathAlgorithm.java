@@ -13,7 +13,7 @@ import db2.esper.engine.EsperEngine;
 public class MathAlgorithm {
 
 	// Questo metodo, sfruttando il th di Pitagora, dovrebbe verificare che le due aree si intersechino o meno. Anche qui, se c'è da sistemare, fai pure ovviamente.
-	public static boolean doIntersect (double xSs, double ySs, int radSs, double xLoc, double yLoc, int radLoc){
+	public static boolean doIntersect (double xSs, double ySs, float radSs, double xLoc, double yLoc, float radLoc){
 		boolean intersect = true;
 		double dist = 0;
 		

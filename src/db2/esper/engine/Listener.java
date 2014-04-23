@@ -1,5 +1,7 @@
 package db2.esper.engine;
 
+import java.awt.Color;
+
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.UpdateListener;
 
@@ -17,10 +19,15 @@ public class Listener implements UpdateListener {
 		for (EventBean e : arg0) {
 			System.out.println("Event received:" + e.getUnderlying());
 			map.drawInPosition(
-					(Double.valueOf(e.get("x").toString()).doubleValue()), 
-					(Double.valueOf(e.get("y").toString()).doubleValue()), 
-					(Double.valueOf(e.get("radius").toString()).doubleValue())
-					);
+					(Double.valueOf(e.get("locX").toString()).doubleValue()), 
+					(Double.valueOf(e.get("locY").toString()).doubleValue()), 
+					(Double.valueOf(e.get("locRadius").toString()).doubleValue()),
+					Color.RED);
+			map.drawInPosition(
+					(Double.valueOf(e.get("pircX").toString()).doubleValue()), 
+					(Double.valueOf(e.get("pircY").toString()).doubleValue()), 
+					(Double.valueOf(e.get("pircRadius").toString()).doubleValue()),
+					Color.GREEN);
 		}
 		
    	}

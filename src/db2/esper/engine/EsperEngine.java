@@ -7,8 +7,6 @@ import java.util.regex.Pattern;
 
 import javax.swing.JFrame;
 
-import org.apache.log4j.BasicConfigurator;
-
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.client.EPServiceProvider;
@@ -66,7 +64,8 @@ public class EsperEngine {
 		JFrame mainWindow; 
 		
 		//inizializzazione di log4j richiesta da Esper, a noi non serve in realt�...
-		BasicConfigurator.configure(); 
+//		BasicConfigurator.configure(); 
+
 		
 		mainWindow = createAndShowGUI();
 		Map map = (Map) mainWindow.getContentPane().getComponent(0);
@@ -140,7 +139,7 @@ public class EsperEngine {
 		//by enzo2: rispetto alla precedente restringe il campo visivo ancora di più, ma non è
 		//ai livelli che si otterrebbero usando il "from pattern" secondo me
 //		query = "SELECT PIRC.deviceID, PIRC.timestamp, LOC.timestamp "
-//				+ "FROM PircEvent(status=true).std:unique(sensorID).win:time(5 sec) as PIRC, LocationEvent.std:unique(timestamp).win:time(5 sec) as LOC "
+//				+ "FROM PircEvent(status=true).std:unique(sensorID).win:time(20 sec) as PIRC, LocationEvent.std:unique(timestamp).win:time(20 sec) as LOC "
 //				+ "WHERE (PIRC.timestamp BETWEEN LOC.timestamp AND LOC.timestamp + 5000) "
 //				+ "AND (db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, 4, LOC.x, LOC.y, 4) = false "
 //				+ "OR db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, LOC.x, LOC.y) = true) ";
@@ -164,12 +163,13 @@ public class EsperEngine {
 //				+ "WHERE NOT EXISTS (SELECT LOC.timestamp "
 //				+ "FROM LOC WHERE db2.esper.util.MathAlgorithm.doIntersect(PIRW.x, PIRW.y, 4, LOC.x, LOC.y, 4)= true )";
 		
-		query = "  SELECT * "
-				+ "FROM LocationEvent ";
-
-		EPStatement pirwEPL= cep.getEPAdministrator().createEPL(query);
-		pirwEPL.addListener(myListener);
-		
+		//QUERY 1: attivazione sensore e localizzatore distante
+		Listener farAwayListener = new Listener(map);
+		query = "SELECT PIRC.x AS pircX, PIRC.y AS pircY, PIRC.radius AS pircRadius, LOC.x AS locX, LOC.y AS locY, LOC.radius AS locRadius "
+				+ "FROM PirwEvent.win:time(20 sec) AS PIRC, LocationEvent.win:time(20 sec) AS LOC "
+				+ "WHERE db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, LOC.x, LOC.y, LOC.radius) = false";
+		EPStatement farAwaySensorActivation = cep.getEPAdministrator().createEPL(query);
+		farAwaySensorActivation.addListener(farAwayListener);
 	}
 	
 	/**
