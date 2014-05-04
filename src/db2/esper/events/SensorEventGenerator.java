@@ -7,6 +7,7 @@ import java.util.Map;
 import com.espertech.esper.client.EPRuntime;
 
 import db2.esper.common.SensorParsedData;
+import db2.esper.common.SyncTimestamp;
 import db2.esper.engine.EsperEngine;
 import db2.esper.event.models.DwcEvent;
 import db2.esper.event.models.PircEvent;
@@ -20,8 +21,8 @@ public class SensorEventGenerator extends EventGenerator {
 	
 	protected String sensorPositionFilePath = null;
 	
-	public SensorEventGenerator(EPRuntime cepRT, String sensorStateFilePath, String sensorPositionFilePath) throws FileNotFoundException {
-		super(cepRT, sensorStateFilePath);
+	public SensorEventGenerator(EPRuntime cepRT, String sensorStateFilePath, String sensorPositionFilePath, SyncTimestamp syncTimestamp) throws FileNotFoundException {
+		super(cepRT, sensorStateFilePath, syncTimestamp);
 		
 		//carico la HashMap con le posizioni dei sensori, durante tutta la simulazione non cambieranno 
 		sensorsPosition = Parse.sensorPositionFile(sensorPositionFilePath);
@@ -41,6 +42,13 @@ public class SensorEventGenerator extends EventGenerator {
 		sensorParsedData = addSensorPosition(sensorParsedData);
 		
 		if(verbose) System.out.println(sensorParsedData.toString());
+		
+		//qui il thread va a nanna per il tempo necessario a essere realtime
+		try {
+			Thread.sleep(getSleepTime(sensorParsedData.getTimestamp())); //get the actual Timestamp
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		
 		//a seconda del tipo di evento che ho parsando creo un oggetto evento diverso
 		if(sensorParsedData.getCategoryName().equalsIgnoreCase("PIRW")) {
@@ -62,12 +70,6 @@ public class SensorEventGenerator extends EventGenerator {
 			if(verbose) System.out.println(dwcEvent.toString());
 		}
 		
-		//qui il thread va a nanna per il tempo necessario a essere realtime
-		try {
-			Thread.sleep(getSleepTime(sensorParsedData.getTimestamp())); //get the actual Timestamp
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	/**
@@ -78,7 +80,7 @@ public class SensorEventGenerator extends EventGenerator {
 	 */
 	private SensorParsedData addSensorPosition(SensorParsedData sensorParsedData) {
 		// si suppone che tutti i nomi dei sensori siano mappati nella Map dichiarata nella classe EsperEngine
-		//TODO se vuoi generalizzarmi aggiungi un controllo, ma per questi file non c'è bisogno.
+		//TODO se vuoi generalizzarmi aggiungi un controllo, ma per questi file non c'ÔøΩ bisogno.
 		
 		double[] thisSensorPosition = sensorsPosition.get( 
 				EsperEngine.sensorIdToName[ sensorParsedData.getDeviceID() ] );
@@ -88,4 +90,6 @@ public class SensorEventGenerator extends EventGenerator {
 		
 		return sensorParsedData;
 	}
+
+
 }

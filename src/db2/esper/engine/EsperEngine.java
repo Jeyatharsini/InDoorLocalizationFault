@@ -13,6 +13,7 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 
+import db2.esper.common.SyncTimestamp;
 import db2.esper.common.Wall;
 import db2.esper.event.models.DwcEvent;
 import db2.esper.event.models.LocationEvent;
@@ -42,6 +43,9 @@ public class EsperEngine {
 	private static final String SENSOR_POSITION_FILE = "zwave_pos.txt";
 	private static final String WALLS_POSITION_FILE = "walls.txt";
 	
+	// utilizzata per ottenere il timestamp inferiore per sincronizzare i due thread
+	static SyncTimestamp sTimestamp = new SyncTimestamp();
+	
 	/* dato che avevamo preparato il codice per usare i deviceID, ma nel file c'ÔøΩ il deviceName
 	 * per non riscrivere l'espressione regolare abbiamo fatto questa Map
 	 * che fa corrispondere a ciascun deviceName il suo deviceID
@@ -63,14 +67,14 @@ public class EsperEngine {
 	public static void main(String[] args) throws InterruptedException, FileNotFoundException {
 		JFrame mainWindow; 
 		
-		//inizializzazione di log4j richiesta da Esper, a noi non serve in realtà...
+		//inizializzazione di log4j richiesta da Esper, a noi non serve in realt√†...
 //		BasicConfigurator.configure(); 
 
 		
 		mainWindow = createAndShowGUI();
 		Map map = (Map) mainWindow.getContentPane().getComponent(0);
 
-		//se in args non è stata passato nessun percorso valido, carica i file di default
+		//se in args non ÔøΩ stata passato nessun percorso valido, carica i file di default
 		String path = null;
 		if(args.length == 0) {
 			path = "data/A"; //cambiami per caricare gli altri test case
@@ -81,7 +85,6 @@ public class EsperEngine {
 		EPServiceProvider cep = EPServiceProviderManager.getProvider("myCEP", getConfiguration());
 		EPRuntime cepRT = cep.getEPRuntime();
 		
-		Listener myListener = new Listener(map);
 		String query = null;
 		
 		//CARICAMENTO DEI FILE
@@ -100,14 +103,16 @@ public class EsperEngine {
 		
 		//AVVIO DEI GENERATORI DI EVENTI
 		//siccome i due eventi location e sensor possono essere contemporanei genero due thread separati
-		SensorEventGenerator sensorEventGenerator = new SensorEventGenerator(cepRT,files.get("sensorState"), files.get("sensorPosition"));
-		LocationEventGenerator locationEventGenerator = new LocationEventGenerator(cepRT, files.get("location")); 
+		SensorEventGenerator sensorEventGenerator = new SensorEventGenerator(cepRT,files.get("sensorState"), files.get("sensorPosition"), sTimestamp);
+		LocationEventGenerator locationEventGenerator = new LocationEventGenerator(cepRT, files.get("location"), sTimestamp); 
 		
 		sensorEventGenerator.setName("sensorThread");
 		locationEventGenerator.setName("locationThread");
 		
-		sensorEventGenerator.start();
+		//TODO Devi sincronizzare i due thread in qualche modo!
+		
 		locationEventGenerator.start();
+		sensorEventGenerator.start();
 		
 		//QUERY
 //		query = "INSERT INTO pirwEPL SELECT * FROM PirwEvent ";
