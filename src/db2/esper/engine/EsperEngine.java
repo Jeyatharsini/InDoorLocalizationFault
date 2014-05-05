@@ -285,8 +285,9 @@ public class EsperEngine {
 	 * @throws FileNotFoundException if the file is not in the directory
 	 */
 	private static String lookForLOCFile(String[] dir, Pattern filePattern, int i) throws FileNotFoundException {
-		if (i<dir.length)
-			return ( filePattern.matcher( dir[i] ).find() )?dir[i]:lookForLOCFile(dir, filePattern, i++);
+		int position = i;
+		if (position < dir.length)
+			return ( filePattern.matcher( dir[position] ).find() ) ? dir[position] : lookForLOCFile(dir, filePattern, position + 1);
 		else
 			throw new FileNotFoundException("LOC file mancante!");
 	}
