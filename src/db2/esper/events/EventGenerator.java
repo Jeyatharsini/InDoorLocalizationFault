@@ -14,6 +14,7 @@ import db2.esper.engine.EsperEngine;
 public abstract class EventGenerator extends Thread implements Observer {
 	
 	protected boolean verbose = EsperEngine.VERBOSE;
+//	protected boolean verbose = false;
 	
 	protected EPRuntime cepRT;
 	protected String filePath;
@@ -21,7 +22,7 @@ public abstract class EventGenerator extends Thread implements Observer {
 	protected long sleepTime = 0;
 	protected long previousTimestamp = 0;
 	protected SyncTimestamp syncTimestamp;
-	protected long syncDeelay = 0;
+	protected long syncDelay = 0;
 	
 	
 	/**
@@ -37,20 +38,24 @@ public abstract class EventGenerator extends Thread implements Observer {
 		this.syncTimestamp = syncTimestamp;
 		this.syncTimestamp.addObserver(this);
 		
-		this.syncTimestamp.setTimestamp(getInitialTimeStamp());
-		
 		try {
 			setParsers();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+
 	}
 	
 	@Override
 	public void run() {
-		//TODO qui il thread va in sleep per startingDeelay milliseconds
 		
-		System.out.println("EventGenerator: " + getClass() + " -> STARTED");
+		try {
+			Thread.sleep(syncDelay);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("EventGenerator: " + getClass() + " -> STARTED with delay: " + syncDelay);
 		
 		while (this.scanner.hasNext()) {
 			generateEvent(this.scanner.nextLine());
@@ -61,6 +66,14 @@ public abstract class EventGenerator extends Thread implements Observer {
 		System.out.println("EventGenerator: " + getClass() + " -> END OF DATA");
 
 		//TODO in qualche modo questo thread va fermato quando ho finito gli eventi...
+	}
+	
+	public void sync() {
+		try {
+			this.syncTimestamp.setTimestamp(getInitialTimeStamp());
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -87,17 +100,44 @@ public abstract class EventGenerator extends Thread implements Observer {
 		return this.sleepTime;
 	}
 	
-	private long getInitialTimeStamp() {
-		// TODO legge prima riga e prende il time stamp.
-		return 0;
-	}
-	
+	/**
+	 * Each time a thread being created update the syncTimestamp object each thread needs to
+	 * recompute the starting delay, if the new syncTimestamp value is less than thread one
+	 */
 	@Override
 	public void update(Observable arg0, Object arg1) {
-		// TODO se il timestamp aggiunto è diverso da quello memorizzato, allora calcola starting deelay
+		long initialTimeStamp = 0;
+
+		//DEBUG
+		if (verbose) {
+			System.out.println("Update method called for: " + getClass());
+		}
 		
+		try {
+			initialTimeStamp = getInitialTimeStamp();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		// se il timestamp in syncTimestamp è minore dello starting timestamp per questo thread
+		// vuol dire che questo thread dovrà partire dopo l'altro, ritardato di syncDelay millisec.
+		if (syncTimestamp.getTimestamp() < initialTimeStamp ) {
+			this.syncDelay = initialTimeStamp - syncTimestamp.getTimestamp();
+		}
 	}
 	
+	/**
+	 * Generates the event object that is fired on the stram
+	 * @param line, String, the first line in the data file
+	 */
 	protected abstract void generateEvent(String line);
+
+	/**
+	 * Read the first line of the file to get the timestamp
+	 * @return timestamp, long, first event timestamp
+	 * @throws FileNotFoundException
+	 */
+	protected abstract long getInitialTimeStamp() throws FileNotFoundException;
+	
 	
 }

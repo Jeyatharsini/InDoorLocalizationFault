@@ -1,15 +1,31 @@
 package db2.esper.event.models;
 
-public class FaultEvent extends LocationEvent {
+public class FaultEvent {
 	
 	private int sensorID;
 	private boolean rise;
+	protected double x;
+	protected double y;
+	protected long timestamp;
 	
-	public FaultEvent(double x, double y, long timestamp, int sensorID,
-			boolean rise) {
-		super(x, y, timestamp);
+	public FaultEvent(double x, double y, long timestamp, int sensorID,	boolean rise) {
+		this.x = x;
+		this.y = y;
+		this.timestamp = timestamp;
 		this.sensorID = sensorID;
 		this.rise = rise;
+	}
+
+	public double getX() {
+		return x;
+	}
+
+	public double getY() {
+		return y;
+	}
+
+	public long getTimestamp() {
+		return timestamp;
 	}
 
 	public int getSensorID() {

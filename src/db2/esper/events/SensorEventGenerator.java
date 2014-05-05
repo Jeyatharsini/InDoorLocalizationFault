@@ -1,8 +1,10 @@
 package db2.esper.events;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 import com.espertech.esper.client.EPRuntime;
 
@@ -89,6 +91,20 @@ public class SensorEventGenerator extends EventGenerator {
 		sensorParsedData.setY(thisSensorPosition[1]);
 		
 		return sensorParsedData;
+	}
+
+	@Override
+	protected long getInitialTimeStamp() throws FileNotFoundException {
+		Scanner scanner = new Scanner(new File(filePath));		
+		SensorParsedData sensorParsedData = Parse.sensorStatusLine(scanner.nextLine());
+		scanner.close();
+		
+		//DEBUG
+		if (verbose) {
+			System.out.println("Initial timestamp sensor: " + sensorParsedData.getTimestamp());
+		}
+		
+		return sensorParsedData.getTimestamp();
 	}
 
 

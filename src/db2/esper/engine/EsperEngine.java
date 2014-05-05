@@ -109,8 +109,11 @@ public class EsperEngine {
 		sensorEventGenerator.setName("sensorThread");
 		locationEventGenerator.setName("locationThread");
 		
-		//TODO Devi sincronizzare i due thread in qualche modo!
+		//Sincronizzo i due thread
+		sensorEventGenerator.sync();
+		locationEventGenerator.sync();
 		
+		//partena dei thread!
 		locationEventGenerator.start();
 		sensorEventGenerator.start();
 		
@@ -120,7 +123,7 @@ public class EsperEngine {
 //		query = "INSERT INTO streamPIRC SELECT * FROM PircEvent(status=true) ";
 
 //		query = "  SELECT * "
-//				+ "FROM SensorEvent.win:time(20) as S, LocationEvent.win:time(10) as L "
+//				+ "FROM SensorEvent.win:time(20) as S, LocationEvent.win:time(20) as L ";
 //				+ "WHERE db2.esper.util.MathAlgorithm.existsWall(S.x, S.y, L.x, L.y) = true";
 		
 //		query = "SELECT PIRC.deviceID, PIRC.timestamp "
@@ -170,9 +173,9 @@ public class EsperEngine {
 		
 		//QUERY 1: attivazione sensore e localizzatore distante
 		Listener farAwayListener = new Listener(map);
-		query = "SELECT PIRC.x AS pircX, PIRC.y AS pircY, PIRC.radius AS pircRadius, LOC.x AS locX, LOC.y AS locY, LOC.radius AS locRadius "
-				+ "FROM PirwEvent.win:time(20 sec) AS PIRC, LocationEvent.win:time(20 sec) AS LOC "
-				+ "WHERE db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, LOC.x, LOC.y, LOC.radius) = false";
+//		query = "SELECT PIRC.x AS pircX, PIRC.y AS pircY, PIRC.radius AS pircRadius, LOC.x AS locX, LOC.y AS locY, LOC.radius AS locRadius "
+//				+ "FROM PirwEvent.win:time(20 sec) AS PIRC, LocationEvent.win:time(20 sec) AS LOC "
+//				+ "WHERE db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, LOC.x, LOC.y, LOC.radius) = false";
 		EPStatement farAwaySensorActivation = cep.getEPAdministrator().createEPL(query);
 		farAwaySensorActivation.addListener(farAwayListener);
 	}

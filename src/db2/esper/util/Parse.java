@@ -9,10 +9,10 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import db2.esper.common.LocationParsedData;
 import db2.esper.common.SensorParsedData;
 import db2.esper.common.Wall;
 import db2.esper.engine.EsperEngine;
-import db2.esper.event.models.LocationEvent;
 
 
 public class Parse {
@@ -38,7 +38,7 @@ public class Parse {
 		 * secondo match: group(1) DeviceID, group(2) value
 		 * quarto match: group(1) CategoryName, group(2) value
 		 * quinto match: group(1) Status, group(2) value
-		 * Se si vuol essere zelanti si può fare un controllo che tutto combaci, 
+		 * Se si vuol essere zelanti si puÔøΩ fare un controllo che tutto combaci, 
 		 * ma noi siamo per le prestazioni pure quindi non lo facciamo.
 		 */
 		int i = 0;
@@ -72,15 +72,15 @@ public class Parse {
 	 * @param line, String the actual line of the file
 	 * @return LoccationEvent with the specific position
 	 */
-	public static LocationEvent locationLine (String line) {
+	public static LocationParsedData locationLine (String line) {
 		boolean verbose = EsperEngine.VERBOSE;
-		LocationEvent locationEvent = null;		
+		LocationParsedData locationParsedData = null;		
 		
 		// qui controllo che la riga sia di mio interesse e non contenga le lettere
 		Matcher matcher = Pattern.compile("[a-zA-Z\\_]+").matcher(line);
 		
 		if ( !matcher.find() ) {
-			// qui, so per certo che questa è una riga di location quindi estrapoto timestamp e coordinate
+			// qui, so per certo che questa ÔøΩ una riga di location quindi estrapoto timestamp e coordinate
 			matcher = Pattern.compile( "([0-9]+) ([0-9]+\\.[0-9]+)? ([0-9]+\\.[0-9]+)?" ).matcher(line);
 			matcher.find();
 
@@ -88,12 +88,12 @@ public class Parse {
 			double positionX = new Double(matcher.group(2).toString());
 			double positionY = new Double(matcher.group(3).toString());
 			
-			locationEvent = new LocationEvent(positionX, positionY, timestamp);
+			locationParsedData = new LocationParsedData(timestamp, positionX, positionY);
 			
-			if(verbose) System.out.println(locationEvent.toString());
+			if(verbose) System.out.println(locationParsedData.toString());
 		}
 
-		return locationEvent;
+		return locationParsedData;
 		
 	}
 	
@@ -141,7 +141,7 @@ public class Parse {
 		boolean verbose = EsperEngine.VERBOSE;
 		ArrayList<Wall> walls = new ArrayList<Wall>();
 		String line = null;
-		//il file presenta numeri separati da spazi questo il perché del \s+
+		//il file presenta numeri separati da spazi questo il perchÔøΩ del \s+
 		Pattern pattern = Pattern.compile(
 				"([0-9]+\\.[0-9]+)\\s+([0-9]+\\.[0-9]+)\\s+([0-9]+\\.[0-9]+)\\s+([0-9]+\\.[0-9]+)"
 				);

@@ -1,5 +1,7 @@
 package db2.esper.event.models;
 
+import db2.esper.common.LocationParsedData;
+
 public class LocationEvent {
 	
 	protected double x;
@@ -7,10 +9,10 @@ public class LocationEvent {
 	protected long timestamp;
 	protected int radius = 1;
 	
-	public LocationEvent(double positionX, double positionY, long timestamp) {
-		this.x = positionX;
-		this.y = positionY;
-		this.timestamp = timestamp;
+	public LocationEvent(LocationParsedData locationParsedData) {
+		this.x = locationParsedData.getX();
+		this.y = locationParsedData.getY();
+		this.timestamp = locationParsedData.getTimestamp();
 	}
 	
 	public double getX() {
