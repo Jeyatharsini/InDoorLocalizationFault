@@ -86,6 +86,7 @@ public class EsperEngine {
 		EPRuntime cepRT = cep.getEPRuntime();
 		
 		String query = null;
+		String query2 = null;
 		
 		//CARICAMENTO DEI FILE
 		HashMap<String, String> files = null;
@@ -138,47 +139,87 @@ public class EsperEngine {
 //		  + "FROM pirwEPL.win:time(30sec) "
 //		  + "WHERE status IN (SELECT status FROM pircEPL.win:time(30sec))";	
 
-		//by enzo1: non è precisissima ma non trova fault
-//		query = "SELECT PIRC.deviceID, PIRC.timestamp, LOC.timestamp "
-//				+ "FROM PircEvent(status=true).std:unique(sensorID).win:time(5 sec) as PIRC, LocationEvent.std:unique(timestamp).win:time(5 sec) as LOC "
-//				+ "WHERE db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, 4, LOC.x, LOC.y, 4) = false "
-//				+ "OR db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, LOC.x, LOC.y) = true ";
-		
-		//by enzo2: rispetto alla precedente restringe il campo visivo ancora di più, ma non è
-		//ai livelli che si otterrebbero usando il "from pattern" secondo me
-//		query = "SELECT PIRC.deviceID, PIRC.timestamp, LOC.timestamp "
-//				+ "FROM PircEvent(status=true).std:unique(sensorID).win:time(20 sec) as PIRC, LocationEvent.std:unique(timestamp).win:time(20 sec) as LOC "
-//				+ "WHERE (PIRC.timestamp BETWEEN LOC.timestamp AND LOC.timestamp + 5000) "
-//				+ "AND (db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, 4, LOC.x, LOC.y, 4) = false "
-//				+ "OR db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, LOC.x, LOC.y) = true) ";
-
-		// by enzo3: forse migliore
-//		 query = "SELECT 'FAULT', PIRC.deviceID, PIRC.timestamp "
-//				 + "FROM PircEvent(status=true).std:unique(sensorID).std:lastevent() AS PIRC, LocationEvent.std:unique(timestamp).win:length(10) AS LOC "
-//				 + "WHERE db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, 4, LOC.x, LOC.y, 4) = false "
-//				 + "OR (db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, 4, LOC.x, LOC.y, 4) = true "
-//				 + "AND db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, LOC.x, LOC.y) = true)"
-//				 + "OUTPUT first every 5 seconds";
-		
-		// by enzo4: è un test, non è errata sintatticamente ma non funziona come dovrebbe
-//		query= "SELECT PIRC.deviceID, PIRC.timestamp, 'FAULT' "
-//				+ "FROM pattern[(every PIRC=PircEvent(status=true)->every (LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, 4, LOC.x, LOC.y, 4)) "
-//				+ "WHERE timer:within(2 sec) AND NOT PircEvent(status=true)))].win:time(2 sec) "
-//				+ "WHERE db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, LOC.x, LOC.y) = true";
-		
-//		query= "SELECT PIRW.deviceID, PIRW.timestamp, 'FAULT' "
-//				+ "FROM pattern[(every PIRW=PirwEvent(status=true)->every (LOC=LocationEvent AND NOT PirwEvent(status=true)))] "
-//				+ "WHERE NOT EXISTS (SELECT LOC.timestamp "
-//				+ "FROM LOC WHERE db2.esper.util.MathAlgorithm.doIntersect(PIRW.x, PIRW.y, 4, LOC.x, LOC.y, 4)= true )";
-		
-		//QUERY 1: attivazione sensore e localizzatore distante
-		Listener farAwayListener = new Listener(map);
+//by Marco: QUERY 1: attivazione sensore e localizzatore distante
+//		Listener farAwayListener = new Listener(map);
 //		query = "SELECT PIRC.x AS pircX, PIRC.y AS pircY, PIRC.radius AS pircRadius, LOC.x AS locX, LOC.y AS locY, LOC.radius AS locRadius "
-//				+ "FROM PirwEvent.win:time(20 sec) AS PIRC, LocationEvent.win:time(20 sec) AS LOC "
+//				+ "FROM PircEvent.win:time(20 sec) AS PIRC, LocationEvent.win:time(20 sec) AS LOC "
 //				+ "WHERE db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, LOC.x, LOC.y, LOC.radius) = false";
+//		EPStatement farAwaySensorActivation = cep.getEPAdministrator().createEPL(query);
+//		farAwaySensorActivation.addListener(farAwayListener);
+		
+		Listener farAwayListener = new Listener(map);
+//Nel caso ti serva: merge tra stream1 e stream2 in uno combinato (ogni evento di stream1 ha null values per i dati di stream2 e viceversa):
+//		query= "INSERT INTO combinedStream SELECT PIRC.deviceID, LOC.x, PIRC.status, PIRC.timestamp, PIRC.x, PIRC.y, PIRC.radius, LOC.timestamp, LOC.y, LOC.radius FROM pattern[every PIRC=PircEvent or every LOC=LocationEvent].win:keepall()"; 
+
+//select * from pattern [every EventA -> (timer:interval(10 sec) and not EventB)]  
+//"This pattern fires if an event A is not followed by an event B within 10 seconds"  zero fault trovati:
+//		query="SELECT 'FAULT', PIRC.deviceID, PIRC.timestamp, PIRC.x, PIRC.y, LOC.x, LOC.y, LOC.timestamp "
+//				+ "FROM pattern[every PIRC=PircEvent(status=true)->(timer:interval(10 sec) and not "
+//				+ "LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, LOC.x, LOC.y, LOC.radius) = true))]";
+		
+//select * from pattern [every EventA -> ((timer:interval(10 sec) and not EventB) and not EventA1)] 
+//E' una versione più constrained e corretta della precedente, xkè ora la ricerca per ogni sensore attivo si interrompe nonappena questo si disattiva, anche se non sono scaduti i 10 sec; zero fault trovati:
+//		query="SELECT 'FAULT', PIRC.deviceID, PIRC.timestamp, PIRC.x, PIRC.y, LOC.x, LOC.y, LOC.timestamp "
+//				+ "FROM pattern[every PIRC=PircEvent(status=true)->((timer:interval(10 sec) and not "
+//				+ "LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, LOC.x, LOC.y, LOC.radius) = true)) "
+//				+ "and not PircEvent(status=false, deviceID=PIRC.deviceID))]";
+
+//select * from pattern [every(EventAf ->(((timer:interval(10sec) and not EventB(conditions)) and not EventAt) -> ((timer:interval(10sec) and not EventB(conditions)) and not EventAf)))]
+//Gestisce anche l'intervallo in cui un sensore da false passa a true, e non solo quello in cui da true ripassa a false. Inoltre è comprensiva dei due fault, ma non li distingue. Versione definitiva?:
+		query="SELECT 'FAULT', PIRC.deviceID, PIRC.timestamp, PIRC.x, PIRC.y, LOC.x, LOC.y, LOC.timestamp "
+				+ "FROM pattern[every (PIRC=PircEvent(status=false)->(((timer:interval(10 sec) and not "
+				+ "LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, LOC.x, LOC.y, LOC.radius) = true and "
+				+ "db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, LOC.x, LOC.y) = false)) and not "
+				+ "PircEvent(status=true, deviceID=PIRC.deviceID)) -> ((timer:interval(10 sec) and not "
+				+ "Loc=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, Loc.x, Loc.y, Loc.radius) = true and "
+				+ "db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, LOC.x, LOC.y) = false)) "
+				+ "and not PircEvent(status=false, deviceID=PIRC.deviceID))))]";
+		
+//select * from pattern [every EventA -> (timer:interval(03 sec) and every (EventB and condition))]
+//Query che trova un fault se entro 3 sec da un eventosensore a true arriva uno (senza every) o più (con every) eventoLOC con area intersecante e muro in mezzo; 9 fault trovati (se non scrivo sulla mappa, a doppio se scrivo sulla mappa...occore un fix):
+//		query2="SELECT PIRC.timestamp, PIRC.deviceID, PIRC.x AS pircX, PIRC.y AS pircY, PIRC.radius AS pircRadius, LOC.x AS locX, LOC.y AS locY, LOC.radius AS locRadius, LOC.timestamp "
+//				+ "FROM pattern[every PIRC=PircEvent(status=true)->(timer:interval(03 sec) AND every "
+//				+ "(LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, LOC.x, LOC.y, LOC.radius) = true AND "
+//				+ "db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, LOC.x, LOC.y) = true)))]";
+		
+//select * from pattern [every EventA -> ((timer:interval(03 sec) and every (EventB and condition)) and not EventA1)]
+//Versione più constrained e corretta(al pari della seconda query); zero fault trovati a differenza della precedente (quindi posso dedurre che occorre dirgli di fermarsi quando il sensore s'è spento):
+//		query2="SELECT 'FAULT', PIRC.deviceID, PIRC.timestamp, PIRC.x, PIRC.y, LOC.x, LOC.y, LOC.timestamp "
+//				+ "FROM pattern[every PIRC=PircEvent(status=true)->((timer:interval(03 sec) AND every "
+//				+ "(LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, LOC.x, LOC.y, LOC.radius) = true AND "
+//				+ "db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, LOC.x, LOC.y) = true))) and not "
+//				+ "PircEvent(deviceID=PIRC.deviceID, status=false))]";
+
+//select * from pattern [every EventA -> ((every EventB and condition) and not EventA1)]
+//Stesso tipo della precedente, ma senza il timer: credo che le due siano equivalenti, xkè qui la ricerca per ogni subexpression muore non appena il sensore della subexpression si spegne; zero fault trovati:
+//		query2="SELECT 'FAULT', PIRC.deviceID, PIRC.timestamp, PIRC.x, PIRC.y, LOC.x, LOC.y, LOC.timestamp "
+//				+ "FROM pattern[every PIRC=PircEvent(status=true)->((every LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, LOC.x, LOC.y, LOC.radius) = true "
+//				+ " AND db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, LOC.x, LOC.y) = true)) and not "
+//				+ "PircEvent(deviceID=PIRC.deviceID, status=false))]";
+		
+//query che esplicitamente rileva se nella sequenza: sensorIDx=false->sensorIDx=true->sensorIDx=false ci sono 
+//SOLO [LOC events con aree intersecanti e muri in mezzo], e non [LOC events con aree intersecanti senza muri in mezzo]. Versione definitiva?:
+		query2="SELECT 'FAULT', PIRC.deviceID, PIRC.timestamp, PIRC.x, PIRC.y, LOC.x, LOC.y, LOC.timestamp "
+				+ "FROM pattern[every (PIRC=PircEvent(status=false)->(((timer:interval(10 sec) and not "
+				+ "LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, LOC.x, LOC.y, LOC.radius) = true and "
+				+ "db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, LOC.x, LOC.y) = false)) and not "
+				+ "PircEvent(status=true, deviceID=PIRC.deviceID)) AND "
+				+ "(Loc=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, Loc.x, Loc.y, Loc.radius) = true and "
+				+ "db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, Loc.x, Loc.y) = true) and not PircEvent(status=true, deviceID=PIRC.deviceID))) -> "
+				+ "(((timer:interval(10 sec) and not "
+				+ "LOC2=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, LOC2.x, LOC2.y, LOC2.radius) = true and "
+				+ "db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, LOC2.x, LOC2.y) = false)) and not "
+				+ "PircEvent(status=false, deviceID=PIRC.deviceID)) AND "
+				+ "(Loc2=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, Loc2.x, Loc2.y, Loc2.radius) = true and "
+				+ "db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, Loc2.x, Loc2.y) = true) and not PircEvent(status=false, deviceID=PIRC.deviceID))))]";
+		
+
 		EPStatement farAwaySensorActivation = cep.getEPAdministrator().createEPL(query);
+		EPStatement withWallSensorActivation = cep.getEPAdministrator().createEPL(query2);
 		farAwaySensorActivation.addListener(farAwayListener);
-	}
+		withWallSensorActivation.addListener(farAwayListener);
+		
+}
 	
 	/**
 	 * Configure the stream of data, adding the event object
