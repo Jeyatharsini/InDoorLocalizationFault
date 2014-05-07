@@ -98,7 +98,7 @@ public abstract class EventGenerator extends Thread implements Observer {
 		this.sleepTime = actualTimestamp - previousTimestamp; 
 		previousTimestamp = actualTimestamp;
 		
-		return this.sleepTime*scaleFactor;
+		return Math.round(this.sleepTime*scaleFactor);
 	}
 	
 	/**
