@@ -217,7 +217,12 @@ public class EsperEngine {
 //				+ "PircEvent(status=false, deviceID=PIRC.deviceID)) AND "
 //				+ "(Loc2=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, Loc2.x, Loc2.y, Loc2.radius) = true and "
 //				+ "db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, Loc2.x, Loc2.y) = true) and not PircEvent(status=false, deviceID=PIRC.deviceID))))]";
-		
+		query = "INSERT INTO lastActive SELECT * FROM PircEvent.win:time_batch(10 sec) AS Pirc "
+				+ "WHERE Pirc.deviceID IN (SELECT PircT.deviceID "
+				+ "FROM PircEvent(status=true).win:time_batch(10 sec) PircT "
+				+ "WHERE NOT EXISTS (SELECT * FROM PircEvent(status=false).win:time_batch(10) AS PircF "
+				+ "WHERE PircF.deviceID=PircT.deviceID AND PircF.timestamp>PircT.timestamp))";
+		query2 = "SELECT * FROM lastActive.std:lastevent()";
 		
 		
 		EPStatement farAwaySensorActivation = cep.getEPAdministrator().createEPL(query);
