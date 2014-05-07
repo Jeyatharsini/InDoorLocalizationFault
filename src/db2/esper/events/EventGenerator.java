@@ -90,6 +90,7 @@ public abstract class EventGenerator extends Thread implements Observer {
 	 * @return long, sleep time in millisec
 	 */
 	protected long getSleepTime(long actualTimestamp) {
+		float scaleFactor = EsperEngine.SCALE_FACTOR;
 		if (previousTimestamp == 0) {
 			previousTimestamp = actualTimestamp;
 		} 
@@ -97,7 +98,7 @@ public abstract class EventGenerator extends Thread implements Observer {
 		this.sleepTime = actualTimestamp - previousTimestamp; 
 		previousTimestamp = actualTimestamp;
 		
-		return this.sleepTime;
+		return this.sleepTime*scaleFactor;
 	}
 	
 	/**
