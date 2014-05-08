@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 
 import javax.swing.JFrame;
 
+import org.apache.log4j.BasicConfigurator;
+
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.client.EPServiceProvider;
@@ -69,7 +71,7 @@ public class EsperEngine {
 		JFrame mainWindow; 
 		
 		//inizializzazione di log4j richiesta da Esper, a noi non serve in realtà...
-//		BasicConfigurator.configure(); 
+		BasicConfigurator.configure(); 
 
 		mainWindow = createAndShowGUI();
 		Map map = (Map) mainWindow.getContentPane().getComponent(0);
@@ -225,9 +227,64 @@ public class EsperEngine {
 //				+ "WHERE NOT EXISTS (SELECT * FROM PircEvent(status=false).win:time_batch(10) AS PircF "
 //				+ "WHERE PircF.deviceID=PircT.deviceID AND PircF.timestamp>PircT.timestamp))";
 		
+//		query2 = "SELECT LOC.x AS locX, LOC.y AS locY, LOC.radius AS locRadius, LOC.timestamp "
+//				+ "FROM LocationEvent as LOC";
 		
-		String query3 = "SELECT LOC.x AS locX, LOC.y AS locY, LOC.radius AS locRadius, LOC.timestamp "
-				+ "FROM LocationEvent as LOC";
+//		String query3 = "SELECT last(deviceID, 0) AS deviceID0, last(deviceID, 1) as deviceID1, last(deviceID,2) as deviceID2, status " 
+//						+ "FROM SensorEvent.win:length(10) AS TS "
+//						+ "WHERE "
+//						+ "deviceID NOT IN ("
+//							+ "SELECT deviceID "
+//							+ "FROM SensorEvent(status=false).win:time(5 sec) AS FS "
+//						+ ") AND "
+//						+ "timestamp > ALL ("
+//							+ "SELECT timestamp "
+//							+ "FROM SensorEvent(status=false).win:time(5 sec) AS FS "
+//						+ ")"
+//						;
+		
+		String falseSensor = "INSERT INTO lastTrueSensor "
+				+ "SELECT deviceID, timestamp "
+				+ "FROM SensorEvent(status=true).std:lastEvent() AS TS ";
+
+		String combinedStream = "INSERT INTO combinedStream "
+				+ "SELECT TS.deviceID AS trueSensor, TS.timestamp AS trueTimestamp, FS.deviceID AS falseSensor, FS.timestamp AS falseTimestamp "
+				+ "FROM pattern[every TS=SensorEvent(status = true) or every FS=SensorEvent(status = false)].win:keepall()"; 
+
+//		combinedStream = "SELECT MAX(TS.deviceID) "
+//				+ "FROM SensorEvent.win:length(10) as TS, SensorEvent.win:length(10) as FS "
+//				+ "WHERE "
+//				+ "TS.deviceID = FS.deviceID AND "
+//				+ "TS.status = true AND "
+//				+ "FS.status = true "
+//				;
+		
+//		combinedStream = "INSERT INTO combinedStream "
+//						+ "SELECT TS.deviceID AS trueDeviceID, FS.deviceID AS falseDeviceID "
+//						+ "FROM SensorEvent(status=true) AS TS, SensorEvent(status=false) AS FS "
+//						+ "WHERE TS.deviceID = FS.deviceID AND TS.timestamp < FS.timestamp "
+//						;
+
+//		String query3 = "SELECT last(event.trueSensor, 0) AS deviceID0 "
+//						+ "FROM combinedStream.win:length(10) AS event "
+//						+ "WHERE event.trueSensor NOT IN ("
+//								+ "SELECT falseSensor "
+//								+ "FROM combinedStream.win:time(10 sec) "
+//							+ ") AND "
+//							+ "event.trueTimestamp > ALL ("
+//								+ "SELECT falseSensor "
+//								+ "FROM combinedStream.win:time(10 sec) "
+//							+ ")"
+//						;
+		
+//		query3 = "SELECT last(deviceID, 0) AS deviceID0, last(deviceID, 1) as deviceID1, last(deviceID,2) as deviceID2, status " 
+//		+ "FROM SensorEvent.win:length(10) AS TS "
+//		+ "WHERE "
+//		+ "timestamp > ALL ("
+//			+ "SELECT timestamp "
+//			+ "FROM SensorEvent(status=false).win:length(10) AS FS "
+//		+ ")"
+//		;
 		
 //		String query3 = "SELECT pirw.x AS sensX, pirw.y AS sensY, pirw.radius AS sensRadius, pirw.timestamp "
 //				+ "FROM PirwEvent as pirw "
@@ -252,14 +309,8 @@ public class EsperEngine {
 				+ "and not LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(SensA1.x, SensA1.y, SensA1.radius, LOC.x, LOC.y, LOC.radius) = true AND "
 				+ "db2.esper.util.MathAlgorithm.existsWall(SensA1.x, SensA1.y, LOC.x, LOC.y) = false)]";
 		
-		
-		EPStatement farAwaySensorActivation = cep.getEPAdministrator().createEPL(query);
-//		EPStatement withWallSensorActivation = cep.getEPAdministrator().createEPL(query2);
 		Listener farAwayListener = new Listener(map);
-		
-		cep.getEPAdministrator().createEPL(query3).addListener(farAwayListener);
-		farAwaySensorActivation.addListener(farAwayListener);
-//		withWallSensorActivation.addListener(farAwayListener);
+		cep.getEPAdministrator().createEPL(combinedStream).addListener(farAwayListener);
 		
 }
 	
