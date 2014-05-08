@@ -37,7 +37,7 @@ public class EsperEngine {
 	
 	//DEBUG FLAG
 	public static final boolean VERBOSE = false;
-	public static final float SCALE_FACTOR = 0.2f;
+	public static final float SCALE_FACTOR = 1f;
 
 	// i nomi dei file che servono per far funzionare il tutto, meno il log delle LOC
 	private static final String SENSOR_STATE_DUMP = "stateDump.txt";
@@ -77,7 +77,7 @@ public class EsperEngine {
 		//se in args non � stata passato nessun percorso valido, carica i file di default
 		String path = null;
 		if(args.length == 0) {
-			path = "data/D"; //cambiami per caricare gli altri test case
+			path = "data/E"; //cambiami per caricare gli altri test case
 		} else {
 			path = args[0]; //Zanero NON sarebbe orgoglioso di te...
 		}
@@ -217,17 +217,47 @@ public class EsperEngine {
 //				+ "PircEvent(status=false, deviceID=PIRC.deviceID)) AND "
 //				+ "(Loc2=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(PIRC.x, PIRC.y, PIRC.radius, Loc2.x, Loc2.y, Loc2.radius) = true and "
 //				+ "db2.esper.util.MathAlgorithm.existsWall(PIRC.x, PIRC.y, Loc2.x, Loc2.y) = true) and not PircEvent(status=false, deviceID=PIRC.deviceID))))]";
-		query = "INSERT INTO lastActive SELECT * FROM PircEvent.win:time_batch(10 sec) AS Pirc "
-				+ "WHERE Pirc.deviceID IN (SELECT PircT.deviceID "
-				+ "FROM PircEvent(status=true).win:time_batch(10 sec) PircT "
-				+ "WHERE NOT EXISTS (SELECT * FROM PircEvent(status=false).win:time_batch(10) AS PircF "
-				+ "WHERE PircF.deviceID=PircT.deviceID AND PircF.timestamp>PircT.timestamp))";
-		query2 = "SELECT * FROM lastActive.std:lastevent()";
+			
+//		query = "INSERT INTO lastActive "
+//				+ "SELECT * FROM PircEvent.win:time_batch(10 sec) AS Pirc "
+//				+ "WHERE Pirc.deviceID IN (SELECT PircT.deviceID "
+//				+ "FROM PircEvent(status=true).win:time_batch(10 sec) PircT "
+//				+ "WHERE NOT EXISTS (SELECT * FROM PircEvent(status=false).win:time_batch(10) AS PircF "
+//				+ "WHERE PircF.deviceID=PircT.deviceID AND PircF.timestamp>PircT.timestamp))";
+		
+		
+		String query3 = "SELECT LOC.x AS locX, LOC.y AS locY, LOC.radius AS locRadius, LOC.timestamp "
+				+ "FROM LocationEvent as LOC";
+		
+//		String query3 = "SELECT pirw.x AS sensX, pirw.y AS sensY, pirw.radius AS sensRadius, pirw.timestamp "
+//				+ "FROM PirwEvent as pirw "
+//				+ "WHERE pirw.deviceID = 2 AND pirw.status = true AND pirw.timestamp > 1395246168154" ;
+//		query = "SELECT PIRC.x AS pircX, PIRC.y AS pircY, PIRC.radius AS pircRadius, PIRC.timestamp, PIRC.deviceID "
+//				+ "FROM SensorEvent as PIRC "
+//				+ "WHERE PIRC.status = true";
+//				
+//		query = "SELECT PIRC.x AS pircX, PIRC.y AS pircY, PIRC.radius AS pircRadius, LOC.x AS locX, LOC.y AS locY, LOC.radius AS locRadius "
+//		+ "FROM PircEvent.win:time(20 sec) AS PIRC, LocationEvent.win:time(20 sec) AS LOC ";
+
+//		query2 = "SELECT * "
+//				+ "FROM PATTERN [every SensA1 = SensorEvent(status=true) -> LOC=LocationEvent("
+//					+ "db2.esper.util.MathAlgorithm.doIntersect(SensA1.x, SensA1.y, SensA1.radius, LOC.x, LOC.y, LOC.radius) = false OR "
+//						+ "db2.esper.util.MathAlgorithm.existsWall(SensA1.x, SensA1.y, LOC.x, LOC.y) = true"
+//					+ ")"
+//				+ "]";
+//		
+//		QUERY FINALE -- Copre i casi A,B,C,D
+		query = "SELECT 'FAULT', SensA1.x AS sensX, SensA1.y AS sensY, SensA1.radius AS sensRadius, SensA1.timestamp, SensA1.deviceID "
+				+ "FROM PATTERN [every SensA1=SensorEvent(status=true) -> SensA2=SensorEvent(status=false and deviceID=SensA1.deviceID) "
+				+ "and not LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(SensA1.x, SensA1.y, SensA1.radius, LOC.x, LOC.y, LOC.radius) = true AND "
+				+ "db2.esper.util.MathAlgorithm.existsWall(SensA1.x, SensA1.y, LOC.x, LOC.y) = false)]";
 		
 		
 		EPStatement farAwaySensorActivation = cep.getEPAdministrator().createEPL(query);
 //		EPStatement withWallSensorActivation = cep.getEPAdministrator().createEPL(query2);
 		Listener farAwayListener = new Listener(map);
+		
+		cep.getEPAdministrator().createEPL(query3).addListener(farAwayListener);
 		farAwaySensorActivation.addListener(farAwayListener);
 //		withWallSensorActivation.addListener(farAwayListener);
 		
