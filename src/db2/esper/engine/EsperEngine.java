@@ -242,14 +242,33 @@ public class EsperEngine {
 //							+ "FROM SensorEvent(status=false).win:time(5 sec) AS FS "
 //						+ ")"
 //						;
-		
-		String falseSensor = "INSERT INTO lastTrueSensor "
-				+ "SELECT deviceID, timestamp "
-				+ "FROM SensorEvent(status=true).std:lastEvent() AS TS ";
 
-		String combinedStream = "INSERT INTO combinedStream "
-				+ "SELECT TS.deviceID AS trueSensor, TS.timestamp AS trueTimestamp, FS.deviceID AS falseSensor, FS.timestamp AS falseTimestamp "
-				+ "FROM pattern[every TS=SensorEvent(status = true) or every FS=SensorEvent(status = false)].win:keepall()"; 
+//		String join = "SELECT last(myWin1.deviceID,0) from SensorEvent.win:length(5) as myWin1, SensorEvent.win:length(5) as myWin2 "
+//						 + "WHERE myWin1.deviceID=myWin2.deviceID AND (( "
+//						 + "myWin1.status=true AND myWin2.status=true AND myWin1.timestamp=myWin2.timestamp) "
+//						 + "OR (myWin2.status=true AND myWin1.status=false AND myWin2.timestamp >= myWin1.timestamp)) "
+//				;
+		
+//		query = "SELECT last(se1.deviceID, 0) "
+//				+ "FROM SensorEvent.win:time_length_batch(5 sec, 4, \"FORCE_UPDATE\") AS se1 "
+//				+ "WHERE se1.status = true AND "
+//				+ "se1.timestamp > 1395246600080 AND "
+//				+ "NOT EXISTS ( "
+//					+ "SELECT deviceID "
+//					+ "FROM SensorEvent.win:time_length_batch(5 sec, 4, \"FORCE_UPDATE\") AS se2 "
+//					+ "WHERE se2.deviceID = se1.deviceID AND "
+//					+ "se2.status = false AND "
+//					+ "se2.timestamp > se1.timestamp AND "
+//					+ "se2.timestamp > 1395246600080 "
+//				+ ")";
+		
+//		String falseSensor = "INSERT INTO lastTrueSensor "
+//				+ "SELECT deviceID, timestamp "
+//				+ "FROM SensorEvent(status=true).std:lastEvent() AS TS ";
+//
+//		String combinedStream = "INSERT INTO combinedStream "
+//				+ "SELECT TS.deviceID AS trueSensor, TS.timestamp AS trueTimestamp, FS.deviceID AS falseSensor, FS.timestamp AS falseTimestamp "
+//				+ "FROM pattern[every TS=SensorEvent(status = true) or every FS=SensorEvent(status = false)].win:keepall()"; 
 
 //		combinedStream = "SELECT MAX(TS.deviceID) "
 //				+ "FROM SensorEvent.win:length(10) as TS, SensorEvent.win:length(10) as FS "
@@ -303,14 +322,27 @@ public class EsperEngine {
 //					+ ")"
 //				+ "]";
 //		
-//		QUERY FINALE -- Copre i casi A,B,C,D
-		query = "SELECT 'FAULT', SensA1.x AS sensX, SensA1.y AS sensY, SensA1.radius AS sensRadius, SensA1.timestamp, SensA1.deviceID "
-				+ "FROM PATTERN [every SensA1=SensorEvent(status=true) -> SensA2=SensorEvent(status=false and deviceID=SensA1.deviceID) "
-				+ "and not LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(SensA1.x, SensA1.y, SensA1.radius, LOC.x, LOC.y, LOC.radius) = true AND "
-				+ "db2.esper.util.MathAlgorithm.existsWall(SensA1.x, SensA1.y, LOC.x, LOC.y) = false)]";
 		
+		String eventiStream = "INSERT INTO eventiStream "
+				+ "SELECT win.deviceID AS deviceID, win.timestamp AS timestamp "
+				+ "FROM SensorEvent(status=true).win:time(10 sec) as win "
+				;
+		
+		query = "SELECT irstream deviceID, timestamp "
+				+ "FROM eventiStream.ext:rank(deviceID, 1, timestamp DESC) "
+				;
+		
+		
+		
+////		QUERY FINALE -- Copre i casi A,B,C,D
+//		query = "SELECT 'FAULT', SensA1.x AS sensX, SensA1.y AS sensY, SensA1.radius AS sensRadius, SensA1.timestamp, SensA1.deviceID "
+//				+ "FROM PATTERN [every SensA1=SensorEvent(status=true) -> SensA2=SensorEvent(status=false and deviceID=SensA1.deviceID) "
+//				+ "and not LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(SensA1.x, SensA1.y, SensA1.radius, LOC.x, LOC.y, LOC.radius) = true AND "
+//				+ "db2.esper.util.MathAlgorithm.existsWall(SensA1.x, SensA1.y, LOC.x, LOC.y) = false)]";
+//		
 		Listener farAwayListener = new Listener(map);
-		cep.getEPAdministrator().createEPL(combinedStream).addListener(farAwayListener);
+		cep.getEPAdministrator().createEPL(eventiStream);
+		cep.getEPAdministrator().createEPL(query).addListener(farAwayListener);
 		
 }
 	
