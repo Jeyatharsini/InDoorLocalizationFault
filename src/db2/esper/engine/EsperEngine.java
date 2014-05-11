@@ -227,9 +227,7 @@ public class EsperEngine {
 //				+ "WHERE NOT EXISTS (SELECT * FROM PircEvent(status=false).win:time_batch(10) AS PircF "
 //				+ "WHERE PircF.deviceID=PircT.deviceID AND PircF.timestamp>PircT.timestamp))";
 		
-//		query2 = "SELECT LOC.x AS locX, LOC.y AS locY, LOC.radius AS locRadius, LOC.timestamp "
-//				+ "FROM LocationEvent as LOC";
-		
+	
 //		String query3 = "SELECT last(deviceID, 0) AS deviceID0, last(deviceID, 1) as deviceID1, last(deviceID,2) as deviceID2, status " 
 //						+ "FROM SensorEvent.win:length(10) AS TS "
 //						+ "WHERE "
@@ -323,26 +321,98 @@ public class EsperEngine {
 //				+ "]";
 //		
 		
-		String eventiStream = "INSERT INTO eventiStream "
-				+ "SELECT win.deviceID AS deviceID, win.timestamp AS timestamp "
-				+ "FROM SensorEvent(status=true).win:time(10 sec) as win "
-				;
+//		le tre query che danno insieme il risultato migliore fin'ora:
+//		String eventiStream = "INSERT INTO eventiStream "
+//				+ "SELECT win.deviceID AS deviceID, win.timestamp AS timestamp, win.categoryID AS category, win.x AS posX, win.y AS posY, win.radius AS rad  "
+//				+ "FROM SensorEvent(status=true).win:time(10 sec) as win "
+//				;
+//		
+//		query = "INSERT INTO lastSensorActive SELECT irstream deviceID, timestamp, category, posX, posY, rad "
+//				+ "FROM eventiStream.ext:rank(deviceID, 1, timestamp DESC) "
+//				;
+//		query2 = "SELECT Sens1.deviceID, 'blindSensorafter', Sens1.timestamp, Sens1.posX AS sensX, Sens1.posY AS sensY, Sens1.rad AS sensRadius "
+//				+ "FROM PATTERN[every Sens1=lastSensorActive -> LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(Sens1.posX, Sens1.posY, Sens1.rad, LOC.x, LOC.y, LOC.radius) = false) "
+//				+ "and not Sens2=lastSensorActive]";
+//		
+//con le seguenti n query cerco la sequenza dell'ultimo sensore attivo, ipotizzando che non piu di 3 sensori siano attivi allo stesso tempo, e considerando tutti i casi possibili:
+		query = "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+				+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
+				+ "from PATTERN[every st1=SensorEvent(status=true) -> sf1=SensorEvent(status=false and deviceID=st1.deviceID) "
+										+ "and not (SensorEvent(status=true) or SensorEvent(status=false and deviceID!=st1.deviceID))]";
 		
-		query = "SELECT irstream deviceID, timestamp "
-				+ "FROM eventiStream.ext:rank(deviceID, 1, timestamp DESC) "
-				;
+		String query1 ="INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+				+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
+				+ "from PATTERN[every st1=SensorEvent(status=true) -> st2=SensorEvent(status=true and deviceID!=st1.deviceID) "
+				+ "and not SensorEvent(status=false and deviceID=st1.deviceID)]";
 		
+		query2 = "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+				+ "Select st3.deviceID, st3.x, st3.y, st3.radius, st3.timestamp "
+				+ "from PATTERN[every st1=SensorEvent(status=true) ->( st2=SensorEvent(status=true and deviceID!=st1.deviceID) "
+				+ "and not SensorEvent(status=false) )-> st3=SensorEvent(status=true) and not "
+				+ "(SensorEvent(status=false and deviceID=st1.deviceID) or SensorEvent(status=false and deviceID=st2.deviceID))]";
+
+		String query3 = "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+				+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
+				+ "from PATTERN[every st1=SensorEvent(status=true) ->( st2=SensorEvent(status=true and deviceID!=st1.deviceID) "
+				+ "and not SensorEvent(status=false and deviceID=st1.deviceID) )-> SensorEvent(status=false and deviceID=st2.deviceID) "
+				+ "and not SensorEvent(status=true)]";
 		
+		String query4= "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+				+ "Select st3.deviceID, st3.x, st3.y, st3.radius, st3.timestamp "
+				+ "from PATTERN[every st1=SensorEvent(status=false and timestamp>1395246600080) -> st2=SensorEvent(status=false) and not "
+				+ "SensorEvent(status=true) -> st3=SensorEvent(status=false) and not SensorEvent(status=true)]";
+		
+		String query5= "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+				+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
+				+ "from PATTERN[every st1=SensorEvent(status=true) ->( st2=SensorEvent(status=false and deviceID!=st1.deviceID) and not "
+				+ "(SensorEvent(status=false and deviceID=st1.deviceID) or SensorEvent(status=true)) )-> "
+				+ "SensorEvent(status=false and deviceID=st1.deviceID) and not SensorEvent(status=true)]";
+		
+		String query6= "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+				+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
+				+ "from PATTERN[every st1=SensorEvent(status=true) ->( st2=SensorEvent(status=true and deviceID!=st1.deviceID) "
+				+ "and not SensorEvent )->( st3=SensorEvent(status=false and deviceID=st2.deviceID) "
+				+ "and not SensorEvent)->( st4=SensorEvent(status=true) and not SensorEvent(status=false and deviceID=st1.deviceID) )->( "
+				+ "SensorEvent(status=false and deviceID=st4.deviceID) and not SensorEvent)]";
+		
+//per controllare che la sequenza dei sensori sia corretta:	
+//		String query7= "Select * from lastSensorActive.std:lastevent()";
+		
+//		la query che tira fuori i fault per il caso E:
+		String query7 = "SELECT Sens1.deviceID, 'blindSensorafter', Sens1.sensX AS sensX, Sens1.sensY AS sensY, Sens1.sensRadius AS sensRadius "
+		+ "FROM PATTERN[every Sens1=lastSensorActive -> LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(Sens1.sensX, Sens1.sensY, Sens1.sensRadius, LOC.x, LOC.y, LOC.radius) = false) "
+		+ "and not Sens2=lastSensorActive]";
+		
+//		la seguente per vedere se uso come pattern ogni sensore che si attiva e successivo: zero fault trovati...ciò dimostrerebbe che è necessario trovare la sequenza dell'ultimo sensore attivo: 
+//		String query7 = "SELECT Sens1.deviceID, 'blindSensorafter', Sens1.timestamp, Sens1.x AS sensX, Sens1.y AS sensY, Sens1.radius AS sensRadius "
+//						+ "FROM PATTERN[Sens1=SensorEvent(status=true) -> LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(Sens1.x, Sens1.y, Sens1.radius, LOC.x, LOC.y, LOC.radius) = false)"
+//						+ "and not Sens2=SensorEvent(status=true)]";
+		
+//		stampa tutti gli eventi attivazione sensore:
+//		String query3= "SELECT Sens1.deviceID, Sens1.timestamp, Sens1.x AS sensX, Sens1.y AS sensY, Sens1.radius AS sensRadius "
+//						+ "FROM SensorEvent(status=true).std:lastevent() AS Sens1";
+		
+//		stampa su mappa tutti gli eventi localizzatore in sequenza
+//		String query4 = "SELECT LOC.x AS locX, LOC.y AS locY, LOC.radius AS locRadius, LOC.timestamp "
+//				+ "FROM LocationEvent.std:lastevent() as LOC";
 		
 ////		QUERY FINALE -- Copre i casi A,B,C,D
 //		query = "SELECT 'FAULT', SensA1.x AS sensX, SensA1.y AS sensY, SensA1.radius AS sensRadius, SensA1.timestamp, SensA1.deviceID "
 //				+ "FROM PATTERN [every SensA1=SensorEvent(status=true) -> SensA2=SensorEvent(status=false and deviceID=SensA1.deviceID) "
 //				+ "and not LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(SensA1.x, SensA1.y, SensA1.radius, LOC.x, LOC.y, LOC.radius) = true AND "
 //				+ "db2.esper.util.MathAlgorithm.existsWall(SensA1.x, SensA1.y, LOC.x, LOC.y) = false)]";
-//		
+		
 		Listener farAwayListener = new Listener(map);
-		cep.getEPAdministrator().createEPL(eventiStream);
-		cep.getEPAdministrator().createEPL(query).addListener(farAwayListener);
+//		cep.getEPAdministrator().createEPL(eventiStream);
+		cep.getEPAdministrator().createEPL(query);
+		cep.getEPAdministrator().createEPL(query1);
+		cep.getEPAdministrator().createEPL(query2);
+		cep.getEPAdministrator().createEPL(query3);
+		cep.getEPAdministrator().createEPL(query4);
+		cep.getEPAdministrator().createEPL(query5);
+		cep.getEPAdministrator().createEPL(query6);
+		cep.getEPAdministrator().createEPL(query7).addListener(farAwayListener);
+		
 		
 }
 	

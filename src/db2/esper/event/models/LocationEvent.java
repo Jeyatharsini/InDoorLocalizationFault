@@ -7,7 +7,7 @@ public class LocationEvent {
 	protected double x;
 	protected double y;
 	protected long timestamp;
-	protected int radius = 1;
+	protected int radius = 4;
 	
 	public LocationEvent(LocationParsedData locationParsedData) {
 		this.x = locationParsedData.getX();
