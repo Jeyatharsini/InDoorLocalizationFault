@@ -335,54 +335,54 @@ public class EsperEngine {
 //				+ "and not Sens2=lastSensorActive]";
 //		
 //con le seguenti n query cerco la sequenza dell'ultimo sensore attivo, ipotizzando che non piu di 3 sensori siano attivi allo stesso tempo, e considerando tutti i casi possibili:
-		query = "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
-				+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
-				+ "from PATTERN[every st1=SensorEvent(status=true) -> sf1=SensorEvent(status=false and deviceID=st1.deviceID) "
-										+ "and not (SensorEvent(status=true) or SensorEvent(status=false and deviceID!=st1.deviceID))]";
-		
-		String query1 ="INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
-				+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
-				+ "from PATTERN[every st1=SensorEvent(status=true) -> st2=SensorEvent(status=true and deviceID!=st1.deviceID) "
-				+ "and not SensorEvent(status=false and deviceID=st1.deviceID)]";
-		
-		query2 = "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
-				+ "Select st3.deviceID, st3.x, st3.y, st3.radius, st3.timestamp "
-				+ "from PATTERN[every st1=SensorEvent(status=true) ->( st2=SensorEvent(status=true and deviceID!=st1.deviceID) "
-				+ "and not SensorEvent(status=false) )-> st3=SensorEvent(status=true) and not "
-				+ "(SensorEvent(status=false and deviceID=st1.deviceID) or SensorEvent(status=false and deviceID=st2.deviceID))]";
-
-		String query3 = "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
-				+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
-				+ "from PATTERN[every st1=SensorEvent(status=true) ->( st2=SensorEvent(status=true and deviceID!=st1.deviceID) "
-				+ "and not SensorEvent(status=false and deviceID=st1.deviceID) )-> SensorEvent(status=false and deviceID=st2.deviceID) "
-				+ "and not SensorEvent(status=true)]";
-		
-		String query4= "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
-				+ "Select st3.deviceID, st3.x, st3.y, st3.radius, st3.timestamp "
-				+ "from PATTERN[every st1=SensorEvent(status=false and timestamp>1395246600080) -> st2=SensorEvent(status=false) and not "
-				+ "SensorEvent(status=true) -> st3=SensorEvent(status=false) and not SensorEvent(status=true)]";
-		
-		String query5= "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
-				+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
-				+ "from PATTERN[every st1=SensorEvent(status=true) ->( st2=SensorEvent(status=false and deviceID!=st1.deviceID) and not "
-				+ "(SensorEvent(status=false and deviceID=st1.deviceID) or SensorEvent(status=true)) )-> "
-				+ "SensorEvent(status=false and deviceID=st1.deviceID) and not SensorEvent(status=true)]";
-		
-		String query6= "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
-				+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
-				+ "from PATTERN[every st1=SensorEvent(status=true) ->( st2=SensorEvent(status=true and deviceID!=st1.deviceID) "
-				+ "and not SensorEvent )->( st3=SensorEvent(status=false and deviceID=st2.deviceID) "
-				+ "and not SensorEvent)->( st4=SensorEvent(status=true) and not SensorEvent(status=false and deviceID=st1.deviceID) )->( "
-				+ "SensorEvent(status=false and deviceID=st4.deviceID) and not SensorEvent)]";
-		
+//		query = "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+//				+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
+//				+ "from PATTERN[every st1=SensorEvent(status=true) -> sf1=SensorEvent(status=false and deviceID=st1.deviceID) "
+//										+ "and not (SensorEvent(status=true) or SensorEvent(status=false and deviceID!=st1.deviceID))]";
+//		
+//		String query1 ="INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+//				+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
+//				+ "from PATTERN[every st1=SensorEvent(status=true) -> st2=SensorEvent(status=true and deviceID!=st1.deviceID) "
+//				+ "and not SensorEvent(status=false and deviceID=st1.deviceID)]";
+//		
+//		query2 = "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+//				+ "Select st3.deviceID, st3.x, st3.y, st3.radius, st3.timestamp "
+//				+ "from PATTERN[every st1=SensorEvent(status=true) ->( st2=SensorEvent(status=true and deviceID!=st1.deviceID) "
+//				+ "and not SensorEvent(status=false) )-> st3=SensorEvent(status=true) and not "
+//				+ "(SensorEvent(status=false and deviceID=st1.deviceID) or SensorEvent(status=false and deviceID=st2.deviceID))]";
+//
+//		String query3 = "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+//				+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
+//				+ "from PATTERN[every st1=SensorEvent(status=true) ->( st2=SensorEvent(status=true and deviceID!=st1.deviceID) "
+//				+ "and not SensorEvent(status=false and deviceID=st1.deviceID) )-> SensorEvent(status=false and deviceID=st2.deviceID) "
+//				+ "and not SensorEvent(status=true)]";
+//		
+//		String query4= "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+//				+ "Select st3.deviceID, st3.x, st3.y, st3.radius, st3.timestamp "
+//				+ "from PATTERN[every st1=SensorEvent(status=false and timestamp>1395246600080) -> st2=SensorEvent(status=false) and not "
+//				+ "SensorEvent(status=true) -> st3=SensorEvent(status=false) and not SensorEvent(status=true)]";
+//		
+//		String query5= "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+//				+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
+//				+ "from PATTERN[every st1=SensorEvent(status=true) ->( st2=SensorEvent(status=false and deviceID!=st1.deviceID) and not "
+//				+ "(SensorEvent(status=false and deviceID=st1.deviceID) or SensorEvent(status=true)) )-> "
+//				+ "SensorEvent(status=false and deviceID=st1.deviceID) and not SensorEvent(status=true)]";
+//		
+//		String query6= "INSERT INTO lastSensorActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+//				+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
+//				+ "from PATTERN[every st1=SensorEvent(status=true) ->( st2=SensorEvent(status=true and deviceID!=st1.deviceID) "
+//				+ "and not SensorEvent )->( st3=SensorEvent(status=false and deviceID=st2.deviceID) "
+//				+ "and not SensorEvent)->( st4=SensorEvent(status=true) and not SensorEvent(status=false and deviceID=st1.deviceID) )->( "
+//				+ "SensorEvent(status=false and deviceID=st4.deviceID) and not SensorEvent)]";
+//		
 //per controllare che la sequenza dei sensori sia corretta:	
 //		String query7= "Select * from lastSensorActive.std:lastevent()";
 		
 //		la query che tira fuori i fault per il caso E:
-		String query7 = "SELECT Sens1.deviceID, 'blindSensorafter', Sens1.sensX AS sensX, Sens1.sensY AS sensY, Sens1.sensRadius AS sensRadius "
-		+ "FROM PATTERN[every Sens1=lastSensorActive -> LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(Sens1.sensX, Sens1.sensY, Sens1.sensRadius, LOC.x, LOC.y, LOC.radius) = false) "
-		+ "and not Sens2=lastSensorActive]";
-		
+//		String query7 = "SELECT Sens1.deviceID, 'blindSensorafter', Sens1.sensX AS sensX, Sens1.sensY AS sensY, Sens1.sensRadius AS sensRadius "
+//		+ "FROM PATTERN[every Sens1=lastSensorActive -> LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(Sens1.sensX, Sens1.sensY, Sens1.sensRadius, LOC.x, LOC.y, LOC.radius) = false) "
+//		+ "and not Sens2=lastSensorActive]";
+//		
 //		la seguente per vedere se uso come pattern ogni sensore che si attiva e successivo: zero fault trovati...ciò dimostrerebbe che è necessario trovare la sequenza dell'ultimo sensore attivo: 
 //		String query7 = "SELECT Sens1.deviceID, 'blindSensorafter', Sens1.timestamp, Sens1.x AS sensX, Sens1.y AS sensY, Sens1.radius AS sensRadius "
 //						+ "FROM PATTERN[Sens1=SensorEvent(status=true) -> LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(Sens1.x, Sens1.y, Sens1.radius, LOC.x, LOC.y, LOC.radius) = false)"
@@ -402,16 +402,116 @@ public class EsperEngine {
 //				+ "and not LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(SensA1.x, SensA1.y, SensA1.radius, LOC.x, LOC.y, LOC.radius) = true AND "
 //				+ "db2.esper.util.MathAlgorithm.existsWall(SensA1.x, SensA1.y, LOC.x, LOC.y) = false)]";
 		
+//		Query1: controlla solo l'ultimo evento sensore attivo nello stream
+		String query1 = "INSERT INTO lastActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+				+ "SELECT deviceID, x, y, radius, timestamp "
+				+ "FROM SensorEvent(status=true).std:lastevent()"
+				;
+		
+		query2 = "INSERT INTO lastActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+				+ "SELECT a1.deviceID, a1.x, a1.y, a1.radius, a1.timestamp "
+				+ "FROM pattern [ every a1=SensorEvent(status=true) -> (a2=SensorEvent(status=true) and not b1=SensorEvent(status=false and deviceID=a1.deviceID)) -> b2=SensorEvent(status=false AND deviceID=a2.deviceID) and not SensorEvent(status=true)] "
+				+ "ORDER BY a1.timestamp "
+				+ "LIMIT 1"
+				;
+		
+		String query3 = "INSERT INTO lastActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+		+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
+		+ "from PATTERN[every st1=SensorEvent(status=true) ->( st2=SensorEvent(status=true and deviceID!=st1.deviceID) "
+		+ "and not SensorEvent )->( st3=SensorEvent(status=false and deviceID=st2.deviceID) "
+		+ "and not SensorEvent)->( st4=SensorEvent(status=true) and not SensorEvent(status=false and deviceID=st1.deviceID) )->( "
+		+ "SensorEvent(status=false and deviceID=st4.deviceID) and not SensorEvent)]";
+
+		
+		String query4 = "INSERT INTO veryLastEvent (deviceID, sensX, sensY, sensRadius, timestamp) "
+				+ "SELECT deviceID, sensX, sensY, sensRadius, timestamp "
+				+ "FROM lastActive.std:lastevent() "
+				;
+		
+//		String query7 = "SELECT Sens1.deviceID, 'blindSensorafter', Sens1.sensX AS sensX, Sens1.sensY AS sensY, Sens1.sensRadius AS sensRadius "
+//					  + "FROM PATTERN[every Sens1=veryLastEvent -> LOC=LocationEvent("
+//					  		+ "db2.esper.util.MathAlgorithm.doIntersect(Sens1.sensX, Sens1.sensY, Sens1.sensRadius, LOC.x, LOC.y, LOC.radius) = false "
+//					  		+ "AND db2.esper.util.MathAlgorithm.existsWall(Sens1.sensX, Sens1.sensY, LOC.x, LOC.y) = false "
+//					  	+ ")  "
+//					  	+ "and not Sens2=veryLastEvent("
+//					  		+ "db2.esper.util.MathAlgorithm.doIntersect(Sens2.sensX, Sens2.sensY, Sens2.sensRadius, LOC.x, LOC.y, LOC.radius) = true "
+//					  		+ "AND db2.esper.util.MathAlgorithm.existsWall(Sens2.sensX, Sens2.sensY, LOC.x, LOC.y) = false "
+//					  	+ ")"
+//					  	+ "]"
+//					  	;
+		
+//		String query7 = ""
+//				+ "SELECT 'faultLocation', Sens.sensX AS sensX, Sens.sensY AS sensY, Sens.sensRadius AS sensRadius "
+//				+ "FROM PATTERN[every Sens=veryLastEvent -> "
+//					+ "LOC=LocationEvent("
+//						+ "db2.esper.util.MathAlgorithm.doIntersect(Sens.sensX, Sens.sensY, Sens.sensRadius, LOC.x, LOC.y, LOC.radius) = false "
+//					+ ") and not veryLastEvent "
+//				  + "]"
+//				  	;
+//		
+//		String query8 = ""
+//				+ "SELECT 'faultLocation', LOC.x AS locX, LOC.y AS locY, LOC.radius AS locRadius "
+//				+ "FROM PATTERN[ every LOC=LocationEvent -> Sens=veryLastEvent("
+//					+ "db2.esper.util.MathAlgorithm.doIntersect(Sens.sensX, Sens.sensY, Sens.sensRadius, LOC.x, LOC.y, LOC.radius) = false OR "
+//					+ "db2.esper.util.MathAlgorithm.existsWall(Sens.sensX, Sens.sensY, LOC.x, LOC.y) = true "
+//				+ ") AND NOT veryLastEvent "
+//				+ "]"
+//				;
+
+		// seleziono tutti gli event location, seguiti da un evento sensore con cui non si intersecano e non esiste un muro
+//		String query7 = ""
+//				+ "SELECT loc.x AS locX, loc.y AS locY, loc.radius AS locRadius "
+//				+ "FROM PATTERN[ "
+//					+ "every sens=veryLastEvent -> "
+//					+ "loc=LocationEvent("
+//						+ "db2.esper.util.MathAlgorithm.doIntersect(sens.sensX, sens.sensY, sens.sensRadius, loc.x, loc.y, loc.radius) = true AND "
+//						+ "db2.esper.util.MathAlgorithm.existsWall(sens.sensX, sens.sensY, loc.x, loc.y) = false "
+//					+ ") AND NOT veryLastEvent -> sens1=veryLastEvent( "
+//						+ "db2.esper.util.MathAlgorithm.doIntersect(sens1.sensX, sens1.sensY, sens1.sensRadius, loc.x, loc.y, loc.radius) = true OR "
+//						+ "db2.esper.util.MathAlgorithm.existsWall(sens.sensX, sens.sensY, loc.x, loc.y) = true "
+//					+ ") AND NOT veryLastEvent "
+//				+ "]"
+//				;
+//				
+		String query7 = ""
+				+ "SELECT loc.x AS locX, loc.y AS locY, loc.radius AS locRadius "
+				+ "FROM PATTERN[ "
+					+ "every sens=veryLastEvent -> "
+					+ "loc=LocationEvent("
+						+ "db2.esper.util.MathAlgorithm.doIntersect(sens.sensX, sens.sensY, sens.sensRadius, loc.x, loc.y, loc.radius) = true AND "
+						+ "db2.esper.util.MathAlgorithm.existsWall(sens.sensX, sens.sensY, loc.x, loc.y) = false "
+					+ ") AND NOT veryLastEvent -> sens2=veryLastEvent( "
+						+ "db2.esper.util.MathAlgorithm.existsWall(sens2.sensX, sens2.sensY, loc.x, loc.y) = true "
+					+ ") AND NOT veryLastEvent "
+				+ "]"
+				;
+		
+
+//		String query7 = ""
+//				+ "SELECT loc.x AS locX, loc.y AS locY, loc.radius AS locRadius "
+//				+ "FROM PATTERN[ "
+//					+ "every sens=veryLastEvent -> "
+//					+ "loc=LocationEvent("
+//						+ "db2.esper.util.MathAlgorithm.doIntersect(sens.sensX, sens.sensY, sens.sensRadius, loc.x, loc.y, loc.radius) = false AND "
+//						+ "db2.esper.util.MathAlgorithm.existsWall(sens.sensX, sens.sensY, loc.x, loc.y) = false "
+//					+ ") AND NOT veryLastEvent  "
+//				+ "]"
+//				;
+//		
+		
+		
 		Listener farAwayListener = new Listener(map);
 //		cep.getEPAdministrator().createEPL(eventiStream);
-		cep.getEPAdministrator().createEPL(query);
+//		cep.getEPAdministrator().createEPL(query);
 		cep.getEPAdministrator().createEPL(query1);
 		cep.getEPAdministrator().createEPL(query2);
 		cep.getEPAdministrator().createEPL(query3);
-		cep.getEPAdministrator().createEPL(query4);
-		cep.getEPAdministrator().createEPL(query5);
-		cep.getEPAdministrator().createEPL(query6);
+		cep.getEPAdministrator().createEPL(query4); //Qui ho l'elenco degli ultimi eventi
+//		cep.getEPAdministrator().createEPL(query5);
+//		cep.getEPAdministrator().createEPL(query6);
 		cep.getEPAdministrator().createEPL(query7).addListener(farAwayListener);
+//		cep.getEPAdministrator().createEPL(query8).addListener(farAwayListener);
+
 		
 		
 }
