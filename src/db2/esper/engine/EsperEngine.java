@@ -13,7 +13,6 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
 
 import db2.esper.common.SyncTimestamp;
 import db2.esper.common.Wall;
@@ -396,38 +395,7 @@ public class EsperEngine {
 //		String query4 = "SELECT LOC.x AS locX, LOC.y AS locY, LOC.radius AS locRadius, LOC.timestamp "
 //				+ "FROM LocationEvent.std:lastevent() as LOC";
 		
-////		QUERY FINALE -- Copre i casi A,B,C,D
-//		query = "SELECT 'FAULT', SensA1.x AS sensX, SensA1.y AS sensY, SensA1.radius AS sensRadius, SensA1.timestamp, SensA1.deviceID "
-//				+ "FROM PATTERN [every SensA1=SensorEvent(status=true) -> SensA2=SensorEvent(status=false and deviceID=SensA1.deviceID) "
-//				+ "and not LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(SensA1.x, SensA1.y, SensA1.radius, LOC.x, LOC.y, LOC.radius) = true AND "
-//				+ "db2.esper.util.MathAlgorithm.existsWall(SensA1.x, SensA1.y, LOC.x, LOC.y) = false)]";
-		
-//		Query1: controlla solo l'ultimo evento sensore attivo nello stream
-		String query1 = "INSERT INTO lastActive (deviceID, sensX, sensY, sensRadius, timestamp) "
-				+ "SELECT deviceID, x, y, radius, timestamp "
-				+ "FROM SensorEvent(status=true).std:lastevent()"
-				;
-		
-		query2 = "INSERT INTO lastActive (deviceID, sensX, sensY, sensRadius, timestamp) "
-				+ "SELECT a1.deviceID, a1.x, a1.y, a1.radius, a1.timestamp "
-				+ "FROM pattern [ every a1=SensorEvent(status=true) -> (a2=SensorEvent(status=true) and not b1=SensorEvent(status=false and deviceID=a1.deviceID)) -> b2=SensorEvent(status=false AND deviceID=a2.deviceID) and not SensorEvent(status=true)] "
-				+ "ORDER BY a1.timestamp "
-				+ "LIMIT 1"
-				;
-		
-		String query3 = "INSERT INTO lastActive (deviceID, sensX, sensY, sensRadius, timestamp) "
-		+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
-		+ "from PATTERN[every st1=SensorEvent(status=true) ->( st2=SensorEvent(status=true and deviceID!=st1.deviceID) "
-		+ "and not SensorEvent )->( st3=SensorEvent(status=false and deviceID=st2.deviceID) "
-		+ "and not SensorEvent)->( st4=SensorEvent(status=true) and not SensorEvent(status=false and deviceID=st1.deviceID) )->( "
-		+ "SensorEvent(status=false and deviceID=st4.deviceID) and not SensorEvent)]";
 
-		
-		String query4 = "INSERT INTO veryLastEvent (deviceID, sensX, sensY, sensRadius, timestamp) "
-				+ "SELECT deviceID, sensX, sensY, sensRadius, timestamp "
-				+ "FROM lastActive.std:lastevent() "
-				;
-		
 //		String query7 = "SELECT Sens1.deviceID, 'blindSensorafter', Sens1.sensX AS sensX, Sens1.sensY AS sensY, Sens1.sensRadius AS sensRadius "
 //					  + "FROM PATTERN[every Sens1=veryLastEvent -> LOC=LocationEvent("
 //					  		+ "db2.esper.util.MathAlgorithm.doIntersect(Sens1.sensX, Sens1.sensY, Sens1.sensRadius, LOC.x, LOC.y, LOC.radius) = false "
@@ -439,17 +407,18 @@ public class EsperEngine {
 //					  	+ ")"
 //					  	+ "]"
 //					  	;
-		
+//		
 //		String query7 = ""
 //				+ "SELECT 'faultLocation', Sens.sensX AS sensX, Sens.sensY AS sensY, Sens.sensRadius AS sensRadius "
 //				+ "FROM PATTERN[every Sens=veryLastEvent -> "
 //					+ "LOC=LocationEvent("
 //						+ "db2.esper.util.MathAlgorithm.doIntersect(Sens.sensX, Sens.sensY, Sens.sensRadius, LOC.x, LOC.y, LOC.radius) = false "
+//						+ "AND db2.esper.util.MathAlgorithm.existsWall(Sens.sensX, Sens.sensY, LOC.x, LOC.y) = false "
 //					+ ") and not veryLastEvent "
 //				  + "]"
 //				  	;
 //		
-//		String query8 = ""
+//		String query7 = ""
 //				+ "SELECT 'faultLocation', LOC.x AS locX, LOC.y AS locY, LOC.radius AS locRadius "
 //				+ "FROM PATTERN[ every LOC=LocationEvent -> Sens=veryLastEvent("
 //					+ "db2.esper.util.MathAlgorithm.doIntersect(Sens.sensX, Sens.sensY, Sens.sensRadius, LOC.x, LOC.y, LOC.radius) = false OR "
@@ -472,19 +441,33 @@ public class EsperEngine {
 //					+ ") AND NOT veryLastEvent "
 //				+ "]"
 //				;
-//				
-		String query7 = ""
-				+ "SELECT loc.x AS locX, loc.y AS locY, loc.radius AS locRadius "
-				+ "FROM PATTERN[ "
-					+ "every sens=veryLastEvent -> "
-					+ "loc=LocationEvent("
-						+ "db2.esper.util.MathAlgorithm.doIntersect(sens.sensX, sens.sensY, sens.sensRadius, loc.x, loc.y, loc.radius) = true AND "
-						+ "db2.esper.util.MathAlgorithm.existsWall(sens.sensX, sens.sensY, loc.x, loc.y) = false "
-					+ ") AND NOT veryLastEvent -> sens2=veryLastEvent( "
-						+ "db2.esper.util.MathAlgorithm.existsWall(sens2.sensX, sens2.sensY, loc.x, loc.y) = true "
-					+ ") AND NOT veryLastEvent "
-				+ "]"
-				;
+			
+		//INVIATA A VERONESE
+//		String query7 = ""
+//				+ "SELECT loc.x AS locX, loc.y AS locY, loc.radius AS locRadius "
+//				+ "FROM PATTERN[ "
+//					+ "every sens=veryLastEvent -> "
+//					+ "loc=LocationEvent("
+//						+ "db2.esper.util.MathAlgorithm.doIntersect(sens.sensX, sens.sensY, sens.sensRadius, loc.x, loc.y, loc.radius) = true AND "
+//						+ "db2.esper.util.MathAlgorithm.existsWall(sens.sensX, sens.sensY, loc.x, loc.y) = false "
+//					+ ") AND NOT veryLastEvent -> sens2=veryLastEvent( "
+//						+ "db2.esper.util.MathAlgorithm.existsWall(sens2.sensX, sens2.sensY, loc.x, loc.y) = true "
+//					+ ") AND NOT veryLastEvent "
+//				+ "]"
+//				;
+
+//		String query7 = ""
+//		+ "SELECT loc.x AS locX, loc.y AS locY, loc.radius AS locRadius "
+//		+ "FROM PATTERN[ "
+//			+ "every loc=LocationEvent -> "
+//			+ "sens=veryLastEvent("
+//				+ "db2.esper.util.MathAlgorithm.doIntersect(sens.sensX, sens.sensY, sens.sensRadius, loc.x, loc.y, loc.radius) = true AND "
+//				+ "db2.esper.util.MathAlgorithm.existsWall(sens.sensX, sens.sensY, loc.x, loc.y) = false "
+//			+ ") -> sens2=veryLastEvent( "
+//				+ "db2.esper.util.MathAlgorithm.existsWall(sens2.sensX, sens2.sensY, loc.x, loc.y) = true "
+//			+ ") "
+//		+ "]"
+//		;
 		
 
 //		String query7 = ""
@@ -498,21 +481,76 @@ public class EsperEngine {
 //				+ "]"
 //				;
 //		
+
+				
 		
-		
+///		QUERY FINALE -- Copre i casi A,B,C,D
+String query4 = "SELECT 'FAULT', SensA1.x AS sensX, SensA1.y AS sensY, SensA1.radius AS sensRadius, SensA1.timestamp, SensA1.deviceID "
+		+ "FROM PATTERN [every SensA1=SensorEvent(status=true) -> SensA2=SensorEvent(status=false and deviceID=SensA1.deviceID) "
+		+ "and not LOC=LocationEvent(db2.esper.util.MathAlgorithm.doIntersect(SensA1.x, SensA1.y, SensA1.radius, LOC.x, LOC.y, LOC.radius) = true AND "
+		+ "db2.esper.util.MathAlgorithm.existsWall(SensA1.x, SensA1.y, LOC.x, LOC.y) = false)]"
+		;
+
+//Query1: controlla solo l'ultimo evento sensore attivo nello stream
+String query1 = "INSERT INTO lastActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+		+ "SELECT deviceID, x, y, radius, timestamp "
+		+ "FROM SensorEvent(status=true).std:lastevent()"
+		;
+
+query2 = "INSERT INTO lastActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+		+ "SELECT a1.deviceID, a1.x, a1.y, a1.radius, a1.timestamp "
+		+ "FROM pattern [ every a1=SensorEvent(status=true) -> "
+		+ "(a2=SensorEvent(status=true) and not b1=SensorEvent(status=false and deviceID=a1.deviceID)) -> "
+		+ "b2=SensorEvent(status=false AND deviceID=a2.deviceID) and not SensorEvent(status=true) ] "
+		+ "ORDER BY a1.timestamp "
+		+ "LIMIT 1"
+		;
+
+//query2 = "INSERT INTO lastActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+//		+ "SELECT a1.deviceID, a1.x, a1.y, a1.radius, a1.timestamp "
+//		+ "FROM pattern [ "
+//			+ "every a1 = SensorEvent(status=true) -> "
+//			+ "every((a2 = SensorEvent(status=true) and not b1=SensorEvent(status=false and deviceID=a1.deviceID)) -> "
+//			+ "b2=SensorEvent(status=false AND deviceID=a2.deviceID) and not SensorEvent(status=false AND deviceID=a1.deviceID)) ->"
+//			+ "SensorEvent(status=false AND deviceID=a1.deviceID) "
+//		+ "] "
+//		+ "ORDER BY a1.timestamp "
+//		+ "LIMIT 1"
+//		;
+
+String query3 = "INSERT INTO lastActive (deviceID, sensX, sensY, sensRadius, timestamp) "
+	+ "Select st1.deviceID, st1.x, st1.y, st1.radius, st1.timestamp "
+	+ "from PATTERN[every st1=SensorEvent(status=true) ->( st2=SensorEvent(status=true and deviceID!=st1.deviceID) "
+	+ "and not SensorEvent )->( st3=SensorEvent(status=false and deviceID=st2.deviceID) "
+	+ "and not SensorEvent)->( st4=SensorEvent(status=true) and not SensorEvent(status=false and deviceID=st1.deviceID) )->( "
+	+ "SensorEvent(status=false and deviceID=st4.deviceID) and not SensorEvent)]";
+
+// QUERY 1 PER SENSORE CIECO
+String query5 = ""
+	+ "SELECT loc.x AS locX, loc.y AS locY, loc.radius AS locRadius, sens.deviceID "
+	+ "FROM lastActive.std:lastevent() as sens, LocationEvent.std:lastevent() as loc "
+	+ "WHERE db2.esper.util.MathAlgorithm.doIntersect(sens.sensX, sens.sensY, sens.sensRadius, loc.x, loc.y, loc.radius) = false AND "
+			+ "db2.esper.util.MathAlgorithm.existsWall(sens.sensX, sens.sensY, loc.x, loc.y) = false "
+	;
+
+// QUERY 1 IMPROVED
+String query6 = ""
+		+ "SELECT 'blindSensorFault', loc.x AS locX, loc.y AS locY, loc.radius AS locRadius, loc.timestamp, sens.deviceID "
+		+ "FROM lastActive.std:lastevent() AS sens, LocationEvent.std:lastevent() AS loc "
+		+ "WHERE (db2.esper.util.MathAlgorithm.doIntersect(sens.sensX, sens.sensY, sens.sensRadius, loc.x, loc.y, loc.radius) = false "
+					+ "AND db2.esper.util.MathAlgorithm.existsWall(sens.sensX, sens.sensY, loc.x, loc.y) = false) "
+		+ "OR (db2.esper.util.MathAlgorithm.doIntersect(sens.sensX, sens.sensY, sens.sensRadius, loc.x, loc.y, loc.radius) = true "
+				+ "AND db2.esper.util.MathAlgorithm.existsWall(sens.sensX, sens.sensY, loc.x, loc.y) = true)"
+		;
+
 		Listener farAwayListener = new Listener(map);
-//		cep.getEPAdministrator().createEPL(eventiStream);
-//		cep.getEPAdministrator().createEPL(query);
 		cep.getEPAdministrator().createEPL(query1);
 		cep.getEPAdministrator().createEPL(query2);
 		cep.getEPAdministrator().createEPL(query3);
-		cep.getEPAdministrator().createEPL(query4); //Qui ho l'elenco degli ultimi eventi
-//		cep.getEPAdministrator().createEPL(query5);
-//		cep.getEPAdministrator().createEPL(query6);
-		cep.getEPAdministrator().createEPL(query7).addListener(farAwayListener);
-//		cep.getEPAdministrator().createEPL(query8).addListener(farAwayListener);
-
-		
+//		cep.getEPAdministrator().createEPL("SELECT * FROM lastActive.std:lastevent()").addListener(farAwayListener);
+//		cep.getEPAdministrator().createEPL(query4).addListener(farAwayListener); //Query finale copre A,B,C,D
+//		cep.getEPAdministrator().createEPL(query5).addListener(farAwayListener); //Query sensore cieco versione basic
+		cep.getEPAdministrator().createEPL(query6).addListener(farAwayListener); //Query sensore cieco versione pro		
 		
 }
 	
